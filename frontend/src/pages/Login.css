@@ -1,0 +1,273 @@
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+.login-page {
+  display: flex;
+  height: 100vh;
+  animation: fadeIn 1s ease-out;
+}
+
+.left-section {
+  width: 50%;
+  background: url('../assets/Subastas.jpg') no-repeat center center;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.5s ease-out;
+  animation: slideIn 0.8s ease-out;
+}
+
+.left-section:hover {
+  transform: scale(1.05);
+}
+
+.right-section {
+  width: 50%;
+  background: linear-gradient(9deg, #4caf50 0%, rgba(2, 0, 36, 1) 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 1s ease-out 0.5s both;
+}
+
+.login-form-container {
+  width: 80%;
+  max-width: 400px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.8s ease-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-form-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+.login-form-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  animation: slideIn 0.8s ease-out 0.2s both;
+  background: linear-gradient(90deg, #45a049, #4caf50, #7ed321);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: shimmer 3s infinite linear;
+}
+
+.login-form-container label {
+  font-size: 0.9rem;
+  display: block;
+  animation: slideIn 0.8s ease-out 0.4s both;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.login-form-container label:hover {
+  color: #48E5E4;
+  transform: translateX(5px);
+}
+
+.login-form-container input {
+  width: 95%;
+  padding: 8px;
+  margin: 10px 0;
+  border: 3px solid #ccc;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  animation: slideIn 0.8s ease-out 0.6s both;
+}
+
+.login-form-container input:focus {
+  border-color: #6fe548;
+  outline: none;
+  box-shadow: 0 0 10px rgba(72, 229, 228, 0.3);
+  transform: translateY(-3px);
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  animation: slideIn 0.8s ease-out 0.8s both;
+}
+
+.form-options label {
+  display: flex;
+  cursor: pointer;
+  font-size: .8rem;
+  transition: transform 0.3s ease;
+}
+
+.form-options label:hover {
+  transform: scale(1.05);
+}
+
+.form-options a {
+  color: #1c9b9a;
+  text-decoration: none;
+  font-size: .8rem;
+  transition: all 0.3s ease;
+}
+
+.form-options a:hover {
+  color: #3BC1C0;
+  text-shadow: 0 0 5px rgba(72, 229, 228, 0.5);
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  background-color: #7ed321;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  animation: slideIn 0.8s ease-out 1s both;
+  position: relative;
+  overflow: hidden;
+}
+
+button[type="submit"]::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #3BC1C0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(59, 193, 192, 0.4);
+}
+
+button[type="submit"]:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+button[type="submit"]:active {
+  transform: translateY(1px);
+}
+
+.social-login {
+  text-align: center;
+  margin-top: 20px;
+  animation: slideIn 0.8s ease-out 1.2s both;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding: 30px;
+}
+
+.icon-button {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.icon-button svg {
+  font-size: 24px;
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.icon-button.google { background-color: #DB4437; }
+.icon-button.facebook { background-color: #4267B2; }
+.icon-button.apple { background-color: #000000; }
+.icon-button { background-color: #0a3490; }
+
+.icon-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.icon-button:active {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .left-section, .right-section {
+    width: 100%;
+    height: 50vh;
+  }
+
+  .login-form-container {
+    width: 90%;
+  }
+
+  .social-icons {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.back-icon {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 1.8rem; /* Tamaño del icono */
+  color: white; /* Color del icono */
+  cursor: pointer;
+  z-index: 10;
+}

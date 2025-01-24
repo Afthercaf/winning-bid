@@ -1,0 +1,42 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Añádelo en el archivo CSS global o específico */
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+  scrollbar-width: thin; /* Para Firefox */
+  scrollbar-color: #48E5E4 #7b0000; /* Para Firefox (thumb color y track) */
+  overflow-y: scroll;
+}
+
+/* Estilos generales de la barra de desplazamiento */
+::-webkit-scrollbar {
+  width: 12px; /* Ancho de la barra de desplazamiento */
+  height: 12px; /* Altura de la barra de desplazamiento horizontal (si existe) */
+}
+
+/* Estilos para el track de la barra (el fondo) */
+::-webkit-scrollbar-track {
+  background: #5d0505; /* Color del fondo del track */
+  border-radius: 10px; /* Bordes redondeados para suavizar */
+}
+
+/* Estilos para el thumb (la parte que se mueve) */
+::-webkit-scrollbar-thumb {
+  background-color: #48E5E4; /* Color de la parte que se mueve */
+  border-radius: 10px; /* Bordes redondeados */
+  border: 3px solid #1C1C3B; /* Espacio entre el thumb y el borde del track */
+}
+
+/* Estilo del thumb cuando se pasa el cursor por encima */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #00b8a9; /* Color al pasar el mouse por encima */
+}
+
+
+

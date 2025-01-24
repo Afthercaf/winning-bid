@@ -1,0 +1,61 @@
+/* Estilos generales para la página "Política de Privacidad" */
+.privacy-policy-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* Estilos para los títulos principales */
+  h1 {
+    font-size: 2.5em;
+    color: #007bff; /* Azul para el título */
+    margin-bottom: 20px;
+  }
+  
+  /* Estilo para los subtítulos de secciones */
+  h2 {
+    font-size: 2em;
+    color: #007bff; /* Azul para los subtítulos */
+    margin-bottom: 15px;
+    margin-top: 30px;
+  }
+  
+  /* Estilo para los párrafos */
+  p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: #6c757d;
+    margin-bottom: 20px;
+  }
+  
+  /* Estilo para las listas */
+  ul {
+    padding-left: 20px;
+    font-size: 1.1em;
+    color: #6c757d;
+  }
+  
+  ul li {
+    margin-bottom: 10px;
+  }
+  
+  /* Estilo para el botón "Regresar" */
+  .back-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-bottom: 20px;
+    text-align: center;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .back-button:hover {
+    background-color: #0056b3;
+  }
+  

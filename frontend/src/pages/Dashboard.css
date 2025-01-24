@@ -1,0 +1,207 @@
+.dashboard-container {
+    display: flex;
+  }
+  
+  .dashboard-content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #424599;
+    color: white;
+  }
+  
+  .dashboard-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .top-stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .stat-card {
+    background-color: #0d1c47;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    flex: 1;
+  }
+  
+  .stat-icon {
+    font-size: 1.5rem;
+    margin-right: 10px;
+  }
+  
+  .stat-card h2 {
+    font-size: 1rem;
+    color: #ffffff;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    color: #ffffff;
+    margin-bottom: 5px;
+  }
+  
+  .stat-change {
+    font-size: 0.9rem;
+    color: #999;
+  }
+  
+  .stat-change.positive {
+    color: #34D399;
+  }
+  
+  .stat-change.negative {
+    color: #EF4444;
+  }
+  
+  .welcome-card {
+    background: #0d1c47;
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    height: 190px; /* Mantiene la altura fija */
+  }
+  
+  .welcome-card h2 {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: white;
+  }
+  
+  .welcome-card h1 {
+    font-size: 2rem;
+    margin-top: 5px;
+    font-weight: bold;
+    color: aqua;
+  }
+  
+  .welcome-card p {
+    margin-top: 10px;
+    font-size: 1.2rem;
+    color: #e0e0e0;
+  }
+  
+  .record-button {
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .record-button:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+  
+  .bottom-stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .bottom-card {
+    background-color: #0d1c47;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+  }
+  
+  .bottom-card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #ffffff;
+  }
+  
+  .bottom-card ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .bottom-card li {
+    margin-bottom: 5px;
+    color: aqua;
+  }
+
+  .additional-card {
+    background-color: #0d1c47;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 400px;
+    height: 190px; /* Altura fija para igualar con welcome-card */
+  }
+  
+  .additional-card h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 10px;
+  }
+  
+  .additional-card ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .additional-card li {
+    color: #ffffff;
+    margin-bottom: 5px;
+  }
+
+  .middle-stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .clientes-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .cliente-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+    font-size: 1rem;
+  }
+  
+  .cliente-item:last-child {
+    border-bottom: none;
+  }
+  
+  .cliente-icon {
+    margin-right: 10px;
+    font-size: 1.2rem;
+    color: #6366F1; /* Color del icono */
+  }
+  
+  
+  
+  

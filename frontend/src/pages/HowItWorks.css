@@ -1,0 +1,78 @@
+/* Estilos generales para la página "Cómo Funciona" */
+.how-it-works-container {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    color: #333;
+  }
+  
+  /* Botón de "Regresar" */
+  .back-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-bottom: 20px;
+    text-align: center;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .back-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Títulos de las secciones */
+  .section-title {
+    font-size: 2em;
+    color: #007bff; /* Azul para los títulos */
+    margin-bottom: 20px;
+  }
+  
+  /* Secciones de contenido */
+  .section {
+    margin-bottom: 40px;
+  }
+  
+  /* Estilo de las listas ordenadas (numeradas) */
+  ol {
+    padding-left: 20px;
+    font-size: 1.1em;
+    color: #6c757d;
+  }
+  
+  ol li {
+    margin-bottom: 15px;
+  }
+  
+  /* Estilo de las listas no ordenadas (bullets) */
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+    font-size: 1.1em;
+  }
+  
+  ul li {
+    margin-bottom: 15px;
+  }
+  
+  /* Estilo para los párrafos */
+  .section p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: #6c757d;
+  }
+  
+  /* Estilos para enlaces */
+  a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  

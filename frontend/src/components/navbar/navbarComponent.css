@@ -1,0 +1,291 @@
+/* Contenedor principal del navbar */
+.navbar-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background: linear-gradient(90deg, #FFFFFF, #F5F5F5);
+  padding: 10px 0;
+  z-index: 100;
+}
+
+/* Estructura del navbar */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 1200px;
+}
+
+/* Links del navbar */
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navbar-links a {
+  color: #333333;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar-links a:hover {
+  color: #7ED321;
+}
+
+/* Contenedor de la barra de búsqueda centrada */
+.search-container {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Barra de búsqueda */
+.search-bar1 {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  outline: none;
+  width: 60%; /* Ajuste para centrar la barra de búsqueda */
+  max-width: 300px;
+  background-color: #FFFFFF;
+  color: #333;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Iconos de notificación y favoritos */
+.notification-icon, .heart-icon {
+  font-size: 1.4rem;
+  color: #333333;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  margin-left: 15px;
+}
+
+.notification-icon:hover, .heart-icon:hover {
+  color: #FFA500;
+}
+
+/* Botón de vender */
+.sell-button {
+  background-color: rgba(125, 221, 33, 0.15);
+  padding: 8px 20px;
+  border-radius: 20px;
+  color: #333333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.sell-button:hover {
+  background-color: #7ED321;
+  color: #FFFFFF;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón de iniciar sesión */
+.login-btn {
+  background-color: #f0f0f0;
+  padding: 8px 24px;
+  border-radius: 20px;
+  color: #333333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border: 1px solid #d1d1d1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 1.5rem;
+}
+
+.login-btn:hover {
+  background-color: #7ED321;
+  color: #FFFFFF;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.login-btn a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Avatar de usuario */
+.avatar-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  margin-left: 1.5rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.user-avatar:hover {
+  transform: scale(1.1);
+}
+
+/* Menú desplegable del avatar */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+  width: 150px;
+  z-index: 100;
+}
+
+.dropdown-menu a {
+  padding: 10px 20px;
+  color: #333333;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-menu a:hover {
+  background-color: #F5F5F5;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 35px;
+  right: 40%;
+  width: 300px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  z-index: 1000;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  background-color: #f7f7f7;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.notification-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #444;
+}
+
+.notification-clear {
+  font-size: 0.85rem;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.notification-clear:hover {
+  text-decoration: underline;
+}
+
+.notification-content {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: 12px 15px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.notification-item:hover {
+  background-color: #f1f1f1;
+}
+
+.unread {
+  font-weight: bold;
+  color: #333;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: #888;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+
+.no-notifications {
+  padding: 15px;
+  font-size: 0.9rem;
+  color: #888;
+  text-align: center;
+}
+
+/* Pantalla de carga */
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #37ea27;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-screen p {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.navbar-logo {
+  height: 40px; /* Adjust as needed */
+  margin-right: 20px; /* Space between logo and links */
+}

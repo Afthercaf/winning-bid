@@ -1,0 +1,121 @@
+.clientes-container {
+    display: flex;
+    height: 100vh;
+}
+
+.clientes-content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #424599;
+}
+
+.clientes-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.search-bar {
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.clientes-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.clientes-table th, .clientes-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.clientes-table th {
+    background-color: #0d1c47;
+    color: white;
+}
+
+.clientes-table td {
+    text-align: center;
+    color: white;
+}
+
+.action-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-right: 5px;
+    color: white;
+}
+
+.view-button {
+    background-color: #3B82F6;
+}
+
+.toggle-button {
+    background-color: #34D399;
+}
+
+.delete-button {
+    background-color: #EF4444;
+}
+
+.action-button:hover {
+    opacity: 0.9;
+}
+
+.pagination {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.page-button {
+    padding: 5px 10px;
+    background-color: #e0e0e0;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.page-button.active {
+    background-color: #0d1c47;
+    color: white;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: left;
+}
+
+.avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    
+  }

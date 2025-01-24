@@ -1,0 +1,23 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getStorage } from "firebase/storage";
+//import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDPPZZC852ArAC9miNKXRlyVcZOCCbmUpg",
+  authDomain: "integradora-504f4.firebaseapp.com",
+  projectId: "integradora-504f4",
+  storageBucket: "integradora-504f4.firebasestorage.app",
+  messagingSenderId: "798421306729",
+  appId: "1:798421306729:web:78be27196a45522b1101f8",
+  measurementId: "G-3D2T2RB9SS"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+export const storage = getStorage(app);
+///const analytics = getAnalytics(app);

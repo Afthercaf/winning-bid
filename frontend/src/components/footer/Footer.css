@@ -1,0 +1,75 @@
+/* Footer Principal */
+.footer {
+  background-color: #f8f9fa;
+  padding: 20px;
+  text-align: center;
+  border-top: 2px solid #ddd;
+}
+
+/* Logo */
+.footer-logo-container {
+  margin-bottom: 20px;
+}
+
+.footer-logo {
+  max-width: 100px;
+  height: auto;
+}
+
+/* Secciones de Modelo de Negocios */
+.footer-sections {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #007bff; /* Línea azul debajo de las secciones */
+  padding-bottom: 20px;
+}
+
+.footer-column {
+  flex: 1;
+  margin: 0 10px;
+  text-align: left;
+}
+
+.footer-title {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  color: #007bff; /* Títulos en azul */
+}
+
+.footer-column p {
+  font-size: 0.9em;
+  color: #6c757d;
+}
+
+/* Línea de Separación */
+.footer-divider {
+  margin: 20px 0;
+  border-top: 2px solid #ddd;
+}
+
+/* Enlaces y Contacto */
+.footer-contact {
+  margin-bottom: 20px;
+}
+
+.footer-contact a {
+  color: #007bff;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.footer-contact a:hover {
+  text-decoration: underline;
+}
+
+.footer-contact-details p {
+  font-size: 0.9em;
+  color: #6c757d;
+}
+
+/* Parte Inferior */
+.footer-bottom {
+  font-size: 0.8em;
+  color: #6c757d;
+}

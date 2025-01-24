@@ -1,0 +1,155 @@
+.my-products-page {
+  background-color: #6060e3; /* Color de fondo general para toda la página */
+  min-height: 100vh;
+  padding: 50px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.my-products-container {
+  padding: 30px;
+  background-color: #1e1e4a;
+  color: #fff;
+  border-radius: 10px;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+}
+
+/* Botón Regresar al Home */
+.back-home-button {
+  background-color: #4CAF50;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 20px;
+}
+
+.back-home-button:hover {
+  background-color: #45a049;
+}
+
+.my-products-title {
+  font-size: 28px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.header-actions {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.create-product-button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.create-product-button:hover {
+  background-color: #45a049;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-around;
+  background-color: #2a2a5a;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.filters {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #333;
+  width: 100%;
+}
+
+.filter-select {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #333;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #2a2a5a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.products-table th, .products-table td {
+  padding: 15px;
+  text-align: center;
+  color: white;
+}
+
+.products-table th {
+  background-color: #333;
+  font-weight: bold;
+}
+
+.products-table tr:nth-child(even) {
+  background-color: #1e1e4a;
+}
+
+.action-button {
+  padding: 8px 15px;
+  margin: 5px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action-button:hover {
+  background-color: #45a049;
+}
+
+.action-button.delete {
+  background-color: #f44336;
+}
+
+.action-button.delete:hover {
+  background-color: #e53935;
+}
+
+.action-button.deactivate {
+  background-color: #FF9800;
+}
+
+.action-button.deactivate:hover {
+  background-color: #fb8c00;
+}
+
+.action-button.activate {
+  background-color: #4CAF50;
+}
+
+.action-button.activate:hover {
+  background-color: #45a049;
+}

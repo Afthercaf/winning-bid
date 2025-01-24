@@ -1,0 +1,141 @@
+.pedido-estado-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
+}
+
+.pedido-estado-card {
+    background-color: #fff;
+    padding: 40px 50px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+}
+
+.pedido-estado-card h1 {
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.phase-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 30px 0;
+    position: relative;
+}
+
+.phase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #777;
+    font-size: 0.9em;
+}
+
+.phase.active {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.phase.completed {
+    color: #28a745;
+    font-weight: bold;
+    z-index: 1;
+}
+
+.phase-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ccc;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+    z-index: 1;
+}
+
+.phase-circle.active {
+    background-color: #007bff;
+}
+
+.phase-circle.completed {
+    background-color: #28a745;
+    z-index: 1;
+}
+
+.progress-bar {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    height: 4px;
+    background-color: #ccc;
+    z-index: 0;
+    border-radius: 2px;
+}
+
+.progress {
+    height: 100%;
+    background-color: #28a745;
+    width: 0;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    z-index: 1;
+}
+
+.finalize-sale-button {
+    background-color: #28a745;
+    color: #fff;
+    padding: 12px 25px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 25px;
+}
+
+.finalize-sale-button:hover {
+    background-color: #218838;
+}
+
+.finalize-sale-button:active {
+    background-color: #1e7e34;
+}
+
+.finalize-sale-button:focus {
+    outline: none;
+}
+
+.product-info {
+    margin: 20px 0;
+    font-size: 1em;
+}
+
+.product-info p {
+    margin: 5px 0;
+}
+
+.back-to-history-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: #007bff;
+    font-size: 0.9em;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.back-to-history-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

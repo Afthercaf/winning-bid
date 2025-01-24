@@ -1,0 +1,167 @@
+.full-screen {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.auction-details-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 2rem;
+    gap: 2rem;
+    overflow-y: auto; /* Permite desplazamiento vertical */
+    height: calc(100vh - 100px); /* Ajusta la altura para que sea desplazable y considere la altura del Navbar y Footer */
+}
+
+.image-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    
+}
+
+.main-image-container {
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    height: 500px;
+}
+
+.main-image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.thumbnail-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    overflow-x: auto; /* Permite desplazamiento horizontal */
+    padding: 5px 0;
+    width: 100%;
+    scroll-behavior: smooth; /* Desplazamiento suave */
+}
+
+.thumbnail-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.thumbnail-image:hover,
+.thumbnail-image:focus {
+    transform: scale(1.1);
+    border-color: #007bff;
+}
+
+
+
+
+.auction-info {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 500px;
+    margin-top: 2rem;
+}
+
+.auction-info h2 {
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: black;
+}
+
+.auction-info p {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+}
+
+.auction-info form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.auction-info input[type="number"] {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.auction-info button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.auction-info button:hover {
+    background-color: #0056b3;
+}
+
+.auction-info ul {
+    margin-top: 1rem;
+    padding-left: 1rem;
+}
+
+.auction-info ul li {
+    list-style: none;
+    margin-bottom: 0.5rem;
+}
+
+
+.time-remaining-box {
+    background-color: rgb(194, 2, 2);
+    color: #ffffff;/* Texto blanco */
+    padding: 0.5rem 1rem;
+    font-weight: bold;  
+    font-size: 1.2rem;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+
+
+
+.auction-ended-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 1rem;
+    font-size: 1.2rem;
+}
+
+
+
+
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .auction-details-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .auction-info, .image-section {
+        width: 100%;
+        max-width: none;
+    }
+}

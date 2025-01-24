@@ -1,0 +1,80 @@
+.banner-carousel {
+    position: relative;
+    width: 100%;
+    height: 500px; /* Aumentamos la altura aquí */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f5f5f5bc;
+  }
+  
+  .carousel-content {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  .banner-image {
+    width: 100%;
+    height: 500px; /* Ajustamos la altura aquí también */
+    object-fit: cover;
+    border-radius: 0; /* Quitamos el borde redondeado */
+    margin-top: 20px;
+  }
+  
+  .carousel-button1 {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #7ED321; /* Color azul del icono */
+    background: #ffffff; /* Fondo blanco */
+    border: 2px solid #7dd321b4; /* Borde azul */
+    padding: 10px 16px;
+    border-radius: 50px; /* Bordes redondeados */
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease, color 0.3s ease;
+  }
+  
+  .carousel-button1:hover {
+    background: #1ae242; /* Cambia el fondo a azul en hover */
+    color: #ffffff; /* Cambia el color del icono a blanco en hover */
+    transform: translateY(-50%) scale(1.05); /* Añade un ligero aumento */
+  }
+  
+  .carousel-button1.left {
+    left: 20px;
+  }
+  
+  .carousel-button1.right {
+    right: 20px;
+  }
+  
+  .carousel-button1:focus {
+    outline: none; /* Elimina el borde de enfoque */
+  }
+  
+  
+  
+  .carousel-indicators {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .indicator {
+    height: 10px;
+    width: 10px;
+    background-color: #c4c4c4;
+    border-radius: 50%;
+    margin: 0 5px;
+    cursor: pointer;
+  }
+  
+  .indicator.active {
+    background-color: #34A853;
+  }
+  
