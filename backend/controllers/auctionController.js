@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const Auction = require('../models/Auction');
 const upload = require('../uploads/multerConfig'); // Configuración de Multer
 
@@ -58,16 +57,12 @@ exports.getAuctions = async (req, res) => {
 exports.getTopBids = async (req, res) => {
     const { auctionId } = req.params;
 
-    // Validar que auctionId sea un ObjectId válido
-    if (!mongoose.Types.ObjectId.isValid(auctionId)) {
-        return res.status(400).json({ error: 'ID inválido' });
-    }
-
     try {
         const auction = await Auction.findById(auctionId);
         if (!auction) return res.status(404).json({ message: "Subasta no encontrada" });
 
         const topBids = auction.bids.sort((a, b) => b.bidAmount - a.bidAmount).slice(0, 3);
+        console.log(topBids);
         res.status(200).json(topBids);
     } catch (error) {
         res.status(500).json({ message: "Error obteniendo las mejores pujas: " + error.message });
@@ -78,11 +73,6 @@ exports.getTopBids = async (req, res) => {
 exports.placeBid = async (req, res) => {
     const { auctionId } = req.params;
     const { user_id, bidAmount } = req.body;
-
-    // Validar que auctionId sea un ObjectId válido
-    if (!mongoose.Types.ObjectId.isValid(auctionId)) {
-        return res.status(400).json({ error: 'ID inválido' });
-    }
 
     try {
         const auction = await Auction.findById(auctionId);
@@ -105,6 +95,8 @@ exports.placeBid = async (req, res) => {
 
         await auction.save();
 
+        req.io.emit("bidUpdate", { auctionId, topBids });
+
         res.status(200).json({ message: "Puja realizada con éxito", auction, topBids });
     } catch (error) {
         res.status(500).json({ message: "Error al realizar la puja" });
@@ -113,32 +105,24 @@ exports.placeBid = async (req, res) => {
 
 // Obtener una subasta por ID
 exports.getAuctionById = async (req, res) => {
-    const { id } = req.params;
-
-    // Validar que id sea un ObjectId válido
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ error: 'ID inválido' });
-    }
-
-    try {
-        const auction = await Auction.findById(id)
-            .populate('product_id')
-            .populate('seller_id', 'name email');
-        if (!auction) return res.status(404).json({ message: 'Subasta no encontrada' });
-        res.status(200).json(auction);
-    } catch (error) {
-        res.status(500).json({ error: 'Error obteniendo la subasta: ' + error.message });
-    }
+  try {
+      const auction = await Auction.findById(req.params.id)
+          .populate('product_id')
+          .populate('seller_id', 'name email');
+      if (!auction) return res.status(404).json({ message: 'Subasta no encontrada' });
+      res.status(200).json(auction);
+  } catch (error) {
+      res.status(500).json({ error: 'Error obteniendo la subasta: ' + error.message });
+  }
 };
 
-// Obtener subastas flash
 exports.getFlashAuctions = async (req, res) => {
-    try {
-        const auctions = await Auction.find({ auctionType: 'flash' })
-            .populate('product_id')
-            .populate('seller_id', 'name email');
-        res.status(200).json(auctions);
-    } catch (error) {
-        res.status(500).json({ error: 'Error obteniendo las subastas flash: ' + error.message });
-    }
+  try {
+      const auctions = await Auction.find({ auctionType: 'flash' })
+          .populate('product_id')
+          .populate('seller_id', 'name email');
+      res.status(200).json(auctions);
+  } catch (error) {
+      res.status(500).json({ error: 'Error obteniendo las subastas flash: ' + error.message });
+  }
 };

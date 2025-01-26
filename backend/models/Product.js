@@ -20,6 +20,7 @@ const productSchema = new mongoose.Schema({
     price: { type: Number },
     startingPrice: { type: Number },
     auctionEndTime: { type: Date },
+    currentPrice: { type: Number, default: 0 },
     stock: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

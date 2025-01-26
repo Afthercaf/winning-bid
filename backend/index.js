@@ -2,28 +2,24 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const { Server: SocketServer } = require("socket.io");
-const http = require("http");
+const WebSocketManager = require("./websocket");
 const { MongoClient } = require("mongodb");
 require("dotenv").config();
 
-const allRouter = require("./routes/allRouter"); // Importa el router consolidado
+const allRouter = require("./routes/allRouter");
+const bidRoutes = require("./routes/bidRoutes");
 
 const app = express();
-const server = http.createServer(app);
-const io = new SocketServer(server, {
-  cors: {
-    origin: "*",
-  },
-});
 
 const PORT = process.env.PORT || 5000;
 
 // Configurar CORS
-app.use(cors({
-    origin: 'http://localhost:5173', // Cambia esto por el origen de tu frontend
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Cambia esto por el origen de tu frontend
     credentials: true,
-}));
+  })
+);
 
 // Middleware para leer JSON
 app.use(express.json());
@@ -42,28 +38,45 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Usar el router consolidado
 app.use("/api", allRouter);
+app.use("/api/bids", bidRoutes);
 
 // Configuración de Socket.IO
-io.on("connection", (socket) => {
-  console.log("Usuario conectado:", socket.id);
-
-  socket.on("message", (data) => {
-    console.log("Nuevo mensaje recibido:", data);
-    io.emit("message", data);
-  });
-
-  socket.on("bidPlaced", (bidData) => {
-    console.log("Nueva puja realizada:", bidData);
-    io.emit("bidUpdate", bidData);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Usuario desconectado:", socket.id);
-  });
-});
+// Inicializar WebSocket
+const websocketManager = new WebSocketManager(app);
+const server = websocketManager.getServer();
+const io = websocketManager.getIO();
 
 // Configuración de MongoDB Client
 const mongoClient = new MongoClient(process.env.MONGODB_URI);
+
+// Endpoint para crear o actualizar usuarios
+app.post("/api/users", async (req, res) => {
+  const { userId, name, email } = req.body;
+
+  try {
+    await mongoClient.connect();
+    const database = mongoClient.db("tecnoshop");
+    const collection = database.collection("usuarios");
+
+    const existingUser = await collection.findOne({ userId });
+
+    if (existingUser) {
+      await collection.updateOne(
+        { userId },
+        { $set: { name, email, updatedAt: new Date() } }
+      );
+      res.status(200).json({ message: "Usuario actualizado con éxito" });
+    } else {
+      await collection.insertOne({ userId, name, email, createdAt: new Date() });
+      res.status(201).json({ message: "Usuario creado con éxito" });
+    }
+  } catch (error) {
+    console.error("Error al crear o actualizar el usuario:", error);
+    res.status(500).json({ error: "Error al crear o actualizar el usuario" });
+  } finally {
+    await mongoClient.close();
+  }
+});
 
 // Endpoint para obtener usuarios
 app.get("/api/users2", async (req, res) => {

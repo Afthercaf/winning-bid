@@ -56,6 +56,7 @@ export const createProduct = [
                 startingPrice: type === 'subasta' ? startingPrice : undefined,
                 auctionEndTime: type === 'subasta' ? auctionEndTime : undefined,
                 seller_id: req.user.id,
+                currentPrice: type === 'subasta' ? startingPrice : undefined,
             });
 
             await newProduct.save();

@@ -16,7 +16,7 @@ const auctionRoutes = require("./auctionRoutes");
 const router = express.Router();
 
 // Configurar rutas
-router.get("/auctions", auctionRoutes);
+router.get("/auctionos", auctionRoutes);
 router.use("/users", userRoutes);
 router.use("/products", productRoutes);
 router.use("/orders", orderRoutes);
@@ -26,6 +26,5 @@ router.use("/reviews", reviewRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/wishlists", wishlistRoutes);
 router.use("/notifications", notificationRoutes);
-router.use("/bids", bidRoutes);
 
 module.exports = router;
