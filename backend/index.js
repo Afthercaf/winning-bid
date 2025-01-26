@@ -1,4 +1,3 @@
-require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -6,18 +5,9 @@ const path = require("path");
 const { Server: SocketServer } = require("socket.io");
 const http = require("http");
 const { MongoClient } = require("mongodb");
+require("dotenv").config();
 
-// Importar rutas
-const userRoutes = require("./routes/userRoutes");
-const productRoutes = require("./routes/productRoutes");
-const orderRoutes = require("./routes/orderRoutes");
-const messageRoutes = require("./routes/messageRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
-const reviewRoutes = require("./routes/reviewRoutes");
-const paymentRoutes = require("./routes/paymentRoutes");
-const wishlistRoutes = require("./routes/wishlistRoutes");
-const notificationRoutes = require("./routes/notificationRoutes");
-const bidRoutes = require("./routes/bidRoutes");
+const allRouter = require("./routes/allRouter"); // Importa el router consolidado
 
 const app = express();
 const server = http.createServer(app);
@@ -30,11 +20,10 @@ const io = new SocketServer(server, {
 const PORT = process.env.PORT || 5000;
 
 // Configurar CORS
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+app.use(cors({
+    origin: 'http://localhost:5173', // Cambia esto por el origen de tu frontend
+    credentials: true,
+}));
 
 // Middleware para leer JSON
 app.use(express.json());
@@ -51,17 +40,8 @@ mongoose
 // Servir archivos estáticos desde la carpeta uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Rutas para cada recurso
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/messages", messageRoutes);
-app.use("/api", categoryRoutes);
-app.use("/api/reviews", reviewRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/wishlists", wishlistRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/bids", bidRoutes);
+// Usar el router consolidado
+app.use("/api", allRouter);
 
 // Configuración de Socket.IO
 io.on("connection", (socket) => {
@@ -110,7 +90,7 @@ app.get("/api/users2", async (req, res) => {
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
     res.status(500).json({ error: "Error al obtener usuarios" });
-  } 
+  }
 });
 
 // Ruta para obtener las ofertas por ID del producto
@@ -119,7 +99,7 @@ app.get("/api/bids2/:productId", async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
   try {
-      await mongoClient.connect();
+    await mongoClient.connect();
     const database = mongoClient.db("tecnoshop");
     const collection = database.collection("bids");
 
@@ -147,7 +127,6 @@ app.get("/api/bids2/:productId", async (req, res) => {
     res.status(500).json({ status: "error", message: "Error al obtener las ofertas" });
   }
 });
-
 
 // Iniciar el servidor
 server.listen(PORT, () => {

@@ -1,47 +1,40 @@
+const mongoose = require('mongoose');
 const Auction = require('../models/Auction');
 const upload = require('../uploads/multerConfig'); // Configuración de Multer
 
 // Crear una subasta con subida de imágenes
 exports.createAuction = [
-    upload.array('images', 5), // Permitir hasta 5 imágenes
+    upload.array('images', 5),
     async (req, res) => {
         try {
             const { product_id, seller_id, startingPrice, auctionType, flashDuration } = req.body;
-            
-            // Validación de datos
+
             if (!product_id || !seller_id || !startingPrice || !auctionType) {
                 return res.status(400).json({ error: 'Faltan datos obligatorios' });
             }
 
-            // Si es una subasta flash, validamos la duración
             let auctionEndTime = new Date();
             if (auctionType === 'flash') {
                 if (!flashDuration || isNaN(flashDuration)) {
-                    return res.status(400).json({ error: 'La duración de la subasta flash debe ser un número válido' });
+                    return res.status(400).json({ error: 'Duración de subasta flash inválida' });
                 }
-                auctionEndTime.setMinutes(auctionEndTime.getMinutes() + parseInt(flashDuration)); // Sumamos minutos a la hora actual
+                auctionEndTime.setMinutes(auctionEndTime.getMinutes() + parseInt(flashDuration));
             } else {
-                auctionEndTime.setHours(auctionEndTime.getHours() + 24); // Subasta normal de 24 horas
+                auctionEndTime.setHours(auctionEndTime.getHours() + 24);
             }
 
-            // Si no se envían imágenes, lo manejamos
             const images = req.files ? req.files.map(file => file.path) : [];
-
-            // Crear la subasta
             const newAuction = new Auction({
                 product_id,
                 seller_id,
                 startingPrice,
                 auctionEndTime,
                 auctionType,
-                flashDuration, // Solo se usará si es una subasta flash
-                images // Guardar las rutas de las imágenes
+                flashDuration,
+                images
             });
 
-            // Guardar la subasta en la base de datos
             await newAuction.save();
-
-            // Responder con la subasta creada
             res.status(201).json({ message: 'Subasta creada exitosamente', auction: newAuction });
         } catch (error) {
             res.status(400).json({ error: 'Error creando la subasta: ' + error.message });
@@ -61,6 +54,83 @@ exports.getAuctions = async (req, res) => {
     }
 };
 
+// Obtener las tres mejores pujas de una subasta
+exports.getTopBids = async (req, res) => {
+    const { auctionId } = req.params;
+
+    // Validar que auctionId sea un ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(auctionId)) {
+        return res.status(400).json({ error: 'ID inválido' });
+    }
+
+    try {
+        const auction = await Auction.findById(auctionId);
+        if (!auction) return res.status(404).json({ message: "Subasta no encontrada" });
+
+        const topBids = auction.bids.sort((a, b) => b.bidAmount - a.bidAmount).slice(0, 3);
+        res.status(200).json(topBids);
+    } catch (error) {
+        res.status(500).json({ message: "Error obteniendo las mejores pujas: " + error.message });
+    }
+};
+
+// Realizar una puja
+exports.placeBid = async (req, res) => {
+    const { auctionId } = req.params;
+    const { user_id, bidAmount } = req.body;
+
+    // Validar que auctionId sea un ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(auctionId)) {
+        return res.status(400).json({ error: 'ID inválido' });
+    }
+
+    try {
+        const auction = await Auction.findById(auctionId);
+        if (!auction) return res.status(404).json({ message: "Subasta no encontrada" });
+
+        if (!auction.isActive) return res.status(400).json({ message: "La subasta ha finalizado" });
+
+        const currentPrice = auction.currentBid > 0 ? auction.currentBid : auction.startingPrice;
+        if (bidAmount <= currentPrice) {
+            return res.status(400).json({
+                message: `La oferta debe ser mayor al precio actual (${currentPrice})`
+            });
+        }
+
+        auction.bids.push({ user_id, bidAmount });
+        auction.currentBid = bidAmount;
+
+        auction.bids.sort((a, b) => b.bidAmount - a.bidAmount);
+        const topBids = auction.bids.slice(0, 3);
+
+        await auction.save();
+
+        res.status(200).json({ message: "Puja realizada con éxito", auction, topBids });
+    } catch (error) {
+        res.status(500).json({ message: "Error al realizar la puja" });
+    }
+};
+
+// Obtener una subasta por ID
+exports.getAuctionById = async (req, res) => {
+    const { id } = req.params;
+
+    // Validar que id sea un ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'ID inválido' });
+    }
+
+    try {
+        const auction = await Auction.findById(id)
+            .populate('product_id')
+            .populate('seller_id', 'name email');
+        if (!auction) return res.status(404).json({ message: 'Subasta no encontrada' });
+        res.status(200).json(auction);
+    } catch (error) {
+        res.status(500).json({ error: 'Error obteniendo la subasta: ' + error.message });
+    }
+};
+
 // Obtener subastas flash
 exports.getFlashAuctions = async (req, res) => {
     try {
@@ -72,86 +142,3 @@ exports.getFlashAuctions = async (req, res) => {
         res.status(500).json({ error: 'Error obteniendo las subastas flash: ' + error.message });
     }
 };
-
-// Obtener una subasta por ID
-exports.getAuctionById = async (req, res) => {
-    try {
-        const auction = await Auction.findById(req.params.id)
-            .populate('product_id')
-            .populate('seller_id', 'name email');
-        if (!auction) return res.status(404).json({ message: 'Subasta no encontrada' });
-        res.status(200).json(auction);
-    } catch (error) {
-        res.status(500).json({ error: 'Error obteniendo la subasta: ' + error.message });
-    }
-};
-
-exports.makeOffer = async (req, res) => {
-    try {
-      const { auctionId, amount, bidder } = req.body; // Ahora usamos auctionId y no productId.
-  
-      // Buscar la subasta por ID
-      const auction = await Auction.findById(auctionId);
-  
-      if (!auction) {
-        return res.status(404).json({
-          status: 'error',
-          message: 'Subasta no encontrada',
-        });
-      }
-  
-      const now = new Date();
-  
-      // Verificar si la subasta ha comenzado
-      if (now > auction.auctionEndTime) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'La subasta ha finalizado',
-        });
-      }
-  
-      // Verificar si la subasta está activa
-      if (!auction.isActive) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'La subasta no está activa',
-        });
-      }
-  
-      // Verificar si la oferta es mayor que el precio actual
-      if (amount <= (auction.currentBid || auction.startingPrice)) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'La oferta debe ser mayor que el precio actual',
-        });
-      }
-  
-      // Agregar la oferta a la lista de ofertas y actualizar la oferta actual
-      auction.bids.push({
-        user_id: bidder,
-        bidAmount: amount,
-        bidTime: now,
-      });
-      auction.currentBid = amount;
-  
-      // Guardar la subasta actualizada
-      const updatedAuction = await auction.save();
-  
-      // Emitir evento de nueva oferta (si tienes WebSocket configurado)
-      req.app.get('io').emit('newOffer', {
-        auctionId,
-        currentBid: amount,
-        bidder,
-      });
-  
-      res.status(200).json({
-        status: 'success',
-        auction: updatedAuction,
-      });
-    } catch (error) {
-      res.status(500).json({
-        status: 'error',
-        message: 'Error al realizar la oferta: ' + error.message,
-      });
-    }
-  };
