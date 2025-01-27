@@ -16,10 +16,10 @@ const PORT = process.env.PORT;
 // Configurar CORS
 app.use(
   cors({
-    origin: "*",
+    origin: process.env.CORS_ORIGIN || "*", // Usa el valor en .env o "*" como predeterminado
+    credentials: true,
   })
 );
-
 // Middleware para leer JSON
 app.use(express.json());
 
