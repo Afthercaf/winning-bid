@@ -149,7 +149,7 @@ router.get("/:productId/bids", async (req, res) => {
 
 // Ruta para obtener las ofertas por ID del producto
 // Ruta para eliminar una puja
-router.delete("/:bidId", async (req, res) => {
+router.delete("/d/:bidId", async (req, res) => {
     try {
         const { id } = req.params;
 
