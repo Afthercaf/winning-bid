@@ -148,29 +148,19 @@ router.get("/:productId/bids", async (req, res) => {
 
 
 // Ruta para obtener las ofertas por ID del producto
-router.get("/:productId/bids", async (req, res) => {
-    const { productId } = req.params;
-    const { page = 1, limit = 10 } = req.query;
-
+// Ruta para eliminar una puja
+router.delete("/:bidId", async (req, res) => {
     try {
-        const skip = (page - 1) * limit;
-        const bids = await Bid.find({ auctionId: productId })
-            .sort({ bidAmount: -1 })
-            .skip(skip)
-            .limit(Number(limit));
+        const { bidId } = req.params;
+        const deletedBid = await Bid.findByIdAndDelete(bidId);
 
-        const total = await Bid.countDocuments({ auctionId: productId });
+        if (!deletedBid) {
+            return res.status(404).json({ message: "Puja no encontrada" });
+        }
 
-        res.status(200).json({
-            bids,
-            pagination: {
-                total,
-                page: Number(page),
-                pages: Math.ceil(total / limit)
-            }
-        });
+        res.status(200).json({ message: "Puja eliminada con éxito" });
     } catch (error) {
-        res.status(500).json({ message: "Error al obtener las pujas", error });
+        res.status(500).json({ message: "Error al eliminar la puja", error });
     }
 });
 
