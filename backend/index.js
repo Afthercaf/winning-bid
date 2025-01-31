@@ -3,23 +3,22 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const WebSocketManager = require("./websocket");
-const { MongoClient } = require("mongodb");
 require("dotenv").config();
 
 const allRouter = require("./routes/allRouter");
 const bidRoutes = require("./routes/bidRoutes");
 
 const app = express();
-
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 // Configurar CORS
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || process.env.CORS_ORIGINS , // Usa el valor en .env o "*" como predeterminado
+    origin: process.env.CORS_ORIGIN || "*", // Usa el valor en .env o "*" como predeterminado
     credentials: true,
   })
 );
+
 // Middleware para leer JSON
 app.use(express.json());
 
@@ -35,63 +34,57 @@ mongoose
 // Servir archivos estáticos desde la carpeta uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Iniciar el servidor HTTP
+const server = app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
+
+// Inicializar WebSocket
+const websocketManager = new WebSocketManager(server);
+const io = websocketManager.getIO();
+
+// Pasar io a las rutas
+app.use((req, res, next) => {
+  req.io = io; // Inyectar io en el request
+  next();
+});
+
 // Usar el router consolidado
 app.use("/api", allRouter);
 app.use("/api/bids", bidRoutes);
-
-// Configuración de Socket.IO
-// Inicializar WebSocket
-const websocketManager = new WebSocketManager(app);
-const server = websocketManager.getServer();
-const io = websocketManager.getIO();
-
-// Configuración de MongoDB Client
-const mongoClient = new MongoClient(process.env.MONGODB_URI);
 
 // Endpoint para crear o actualizar usuarios
 app.post("/api/users", async (req, res) => {
   const { userId, name, email } = req.body;
 
   try {
-    await mongoClient.connect();
-    const database = mongoClient.db("tecnoshop");
-    const collection = database.collection("usuarios");
-
-    const existingUser = await collection.findOne({ userId });
+    const existingUser = await User.findOne({ userId });
 
     if (existingUser) {
-      await collection.updateOne(
+      await User.updateOne(
         { userId },
         { $set: { name, email, updatedAt: new Date() } }
       );
       res.status(200).json({ message: "Usuario actualizado con éxito" });
     } else {
-      await collection.insertOne({ userId, name, email, createdAt: new Date() });
+      await User.create({ userId, name, email, createdAt: new Date() });
       res.status(201).json({ message: "Usuario creado con éxito" });
     }
   } catch (error) {
     console.error("Error al crear o actualizar el usuario:", error);
     res.status(500).json({ error: "Error al crear o actualizar el usuario" });
-  } finally {
-    await mongoClient.close();
   }
 });
 
 // Endpoint para obtener usuarios
 app.get("/api/users2", async (req, res) => {
   try {
-    await mongoClient.connect();
-    console.log("Conectado a MongoDB para obtener usuarios");
-
-    const database = mongoClient.db("tecnoshop");
-    const collection = database.collection("usuarios");
-
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const users = await collection.find({}).skip(skip).limit(limit).toArray();
-    const totalUsers = await collection.countDocuments();
+    const users = await User.find({}).skip(skip).limit(limit);
+    const totalUsers = await User.countDocuments();
 
     res.status(200).json({
       data: users,
@@ -111,19 +104,13 @@ app.get("/api/bids2/:productId", async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
   try {
-    await mongoClient.connect();
-    const database = mongoClient.db("tecnoshop");
-    const collection = database.collection("bids");
-
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const bids = await collection
-      .find({ productId })
+    const bids = await Bid.find({ productId })
       .sort({ bidTime: -1 })
       .skip(skip)
-      .limit(parseInt(limit))
-      .toArray();
+      .limit(parseInt(limit));
 
-    const totalBids = await collection.countDocuments({ productId });
+    const totalBids = await Bid.countDocuments({ productId });
 
     res.json({
       status: "success",
@@ -138,9 +125,4 @@ app.get("/api/bids2/:productId", async (req, res) => {
     console.error("Error al obtener las ofertas:", error);
     res.status(500).json({ status: "error", message: "Error al obtener las ofertas" });
   }
-});
-
-// Iniciar el servidor
-server.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

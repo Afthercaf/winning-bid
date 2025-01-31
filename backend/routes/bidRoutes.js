@@ -3,21 +3,8 @@ const mongoose = require("mongoose");
 const Bid = require("../models/Bid");
 const Product = require("../models/Product");
 const User = require("../models/User");
-const WebSocketManager = require('../websocket'); // Importamos el WebSocketManager
-const { MongoClient } = require("mongodb");
 
-const mongoClient = new MongoClient(process.env.MONGODB_URI);
-
-// Instanciamos WebSocketManager
-const websocketManager = new WebSocketManager();
-const io = websocketManager.getIO(); // Obtenemos la instancia de io
-
-// Middleware para inyectar socket en las rutas
 const router = express.Router();
-router.use((req, res, next) => {
-    req.io = io; // Inyectamos la instancia de io en el request
-    next();
-});
 
 // Validación de pujas
 const validateBid = async (product, bidAmount) => {
@@ -42,8 +29,8 @@ router.post("/:productId/bid-j", async (req, res) => {
         const { userId, bidAmount } = req.body;
 
         // Validación de parámetros de entrada
-        if (!mongoose.Types.ObjectId.isValid(userId) || 
-            !mongoose.Types.ObjectId.isValid(productId) || 
+        if (!mongoose.Types.ObjectId.isValid(userId) ||
+            !mongoose.Types.ObjectId.isValid(productId) ||
             bidAmount <= 0) {
             throw new Error("Parámetros de entrada inválidos");
         }
@@ -86,8 +73,8 @@ router.post("/:productId/bid-j", async (req, res) => {
         }
 
         // Actualizar el precio actual del producto
-        await Product.findByIdAndUpdate(productId, { 
-            currentPrice: bidAmount 
+        await Product.findByIdAndUpdate(productId, {
+            currentPrice: bidAmount,
         }, { session });
 
         const topBids = await Bid.find({ auctionId: productId })
@@ -103,21 +90,21 @@ router.post("/:productId/bid-j", async (req, res) => {
                 userId: bid.userId,
                 userName: bid.userName,
                 bidAmount: bid.bidAmount,
-                timestamp: bid.bidTime
-            }))
+                timestamp: bid.bidTime,
+            })),
         });
 
         await session.commitTransaction();
         res.status(200).json({ message: "Puja actualizada con éxito" });
-
+        console.log("Puja actualizada con éxito");
     } catch (error) {
         await session.abortTransaction();
         res.status(400).json({ message: error.message || "Error al crear o actualizar la puja" });
+        console.error("Error al crear o actualizar la puja:", error);
     } finally {
         session.endSession();
     }
 });
-
 
 // Ruta para obtener las ofertas por ID del producto
 router.get("/:productId/bids", async (req, res) => {
@@ -146,30 +133,28 @@ router.get("/:productId/bids", async (req, res) => {
     }
 });
 
-
-// Ruta para obtener las ofertas por ID del producto
 // Ruta para eliminar una puja
 router.delete("/d/:bidId", async (req, res) => {
     try {
-        const { id } = req.params;
+        const { bidId } = req.params;
 
-        // Verificar si el producto existe
-        const product = await Product.findById(id);
-        if (!product) {
-            return res.status(404).json({ message: 'Producto no encontrado' });
+        // Verificar si la puja existe
+        const bid = await Bid.findById(bidId);
+        if (!bid) {
+            return res.status(404).json({ message: 'Puja no encontrada' });
         }
 
-        // Verificar si el usuario autenticado es el dueño del producto
-        if (product.seller_id.toString() !== req.user.id) {
-            return res.status(403).json({ message: 'No tienes permiso para eliminar este producto' });
+        // Verificar si el usuario autenticado es el dueño de la puja
+        if (bid.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'No tienes permiso para eliminar esta puja' });
         }
 
-        // Eliminar el producto
-        await Product.findByIdAndDelete(id);
-        res.status(200).json({ message: 'Producto eliminado exitosamente' });
+        // Eliminar la puja
+        await Bid.findByIdAndDelete(bidId);
+        res.status(200).json({ message: 'Puja eliminada exitosamente' });
     } catch (error) {
-        console.error('Error al eliminar el producto:', error.message);
-        res.status(500).json({ message: 'Error al eliminar el producto', error });
+        console.error('Error al eliminar la puja:', error.message);
+        res.status(500).json({ message: 'Error al eliminar la puja', error });
     }
 });
 
