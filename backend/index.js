@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 // Configurar CORS
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || process.env.CORS_ORIGINS , // Usa el valor en .env o "*" como predeterminado
+    origin: process.env.CORS_ORIGIN || process.env.CORS_ORIGINS   || "*" , // Usa el valor en .env o "*" como predeterminado
     credentials: true,
   })
 );
