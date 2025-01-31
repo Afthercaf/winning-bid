@@ -27,6 +27,6 @@ router.get('/recommendations', productController.getRecommendedProducts);
 router.get('/:productId', productController.getProductById);
 
 
-
+router.delete('/:productId',authMiddleware ,productController.deleteProduct);
 
 module.exports = router;
