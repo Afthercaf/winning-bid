@@ -201,3 +201,30 @@ export const getUserProducts = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener los productos del usuario' });
     }
 };
+
+
+// Eliminar un producto por ID
+export const deleteProduct = async (req, res) => {
+    try {
+        const productId = req.params.productId;
+
+        // Verificar si el producto existe
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Producto no encontrado' });
+        }
+
+        // Verificar si el usuario autenticado es el propietario del producto
+        if (product.seller_id.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'No tienes permiso para eliminar este producto' });
+        }
+
+        // Eliminar el producto
+        await Product.findByIdAndDelete(productId);
+
+        res.status(200).json({ message: 'Producto eliminado correctamente' });
+    } catch (error) {
+        console.error('Error al eliminar el producto:', error.message);
+        res.status(500).json({ message: 'Error al eliminar el producto', error });
+    }
+};
