@@ -28,40 +28,43 @@ router.post("/:productId/bid-j", async (req, res) => {
         const { productId } = req.params;
         const { userId, bidAmount } = req.body;
 
-        // Validación de parámetros de entrada
+        // Validar los datos
         if (!mongoose.Types.ObjectId.isValid(userId) ||
             !mongoose.Types.ObjectId.isValid(productId) ||
             bidAmount <= 0) {
             throw new Error("Parámetros de entrada inválidos");
         }
 
-        // Buscar usuario y producto
+        // Buscar usuario y producto dentro de la transacción
         const user = await User.findById(userId).session(session);
         const product = await Product.findById(productId).session(session);
 
-        if (!user) {
-            throw new Error("Usuario no encontrado");
-        }
-        if (!product || product.type !== "subasta") {
-            throw new Error("Producto no encontrado o no es una subasta");
-        }
+        if (!user) throw new Error("Usuario no encontrado");
+        if (!product || product.type !== "subasta") throw new Error("Producto no válido");
 
+        // Verificar si la subasta ha terminado
         if (product.endTime && product.endTime < new Date()) {
-            throw new Error("La subasta ha terminado");
+            throw new Error("La subasta ha finalizado");
         }
 
-        await validateBid(product, bidAmount);
+        // Obtener la puja más alta existente
+        const highestBid = await Bid.findOne({ auctionId: productId })
+            .sort({ bidAmount: -1 })
+            .session(session);
 
-        // Verificar si ya existe una puja del usuario para este producto
+        const minValidPrice = highestBid ? highestBid.bidAmount : product.startingPrice;
+        if (bidAmount <= minValidPrice) {
+            throw new Error(`La puja debe ser mayor a $${minValidPrice}`);
+        }
+
+        // Actualizar o crear la puja del usuario
         const existingBid = await Bid.findOne({ auctionId: productId, userId }).session(session);
 
         if (existingBid) {
-            // Actualizar la puja existente
             existingBid.bidAmount = bidAmount;
             existingBid.bidTime = new Date();
             await existingBid.save({ session });
         } else {
-            // Crear una nueva puja si no existe
             const newBid = new Bid({
                 auctionId: productId,
                 userId,
@@ -72,17 +75,20 @@ router.post("/:productId/bid-j", async (req, res) => {
             await newBid.save({ session });
         }
 
-        // Actualizar el precio actual del producto
-        await Product.findByIdAndUpdate(productId, {
-            currentPrice: bidAmount,
-        }, { session });
+        // Actualizar el precio actual del producto de forma atómica
+        await Product.findByIdAndUpdate(
+            productId,
+            { $set: { currentPrice: bidAmount } },
+            { session }
+        );
 
+        // Obtener las 5 mejores pujas
         const topBids = await Bid.find({ auctionId: productId })
             .sort({ bidAmount: -1 })
             .limit(5)
             .session(session);
 
-        // Emitir el evento de WebSocket
+        // Emitir actualización de puja a través de WebSocket
         req.io.to(productId).emit('bidUpdate', {
             productId,
             currentPrice: bidAmount,
@@ -94,17 +100,17 @@ router.post("/:productId/bid-j", async (req, res) => {
             })),
         });
 
+        // Confirmar la transacción
         await session.commitTransaction();
-        res.status(200).json({ message: "Puja actualizada con éxito" });
-        console.log("Puja actualizada con éxito");
+        res.status(200).json({ message: "Puja aceptada con éxito" });
     } catch (error) {
         await session.abortTransaction();
-        res.status(400).json({ message: error.message || "Error al crear o actualizar la puja" });
-        console.error("Error al crear o actualizar la puja:", error);
+        res.status(400).json({ message: error.message || "Error al realizar la puja" });
     } finally {
         session.endSession();
     }
 });
+
 
 // Ruta para obtener las ofertas por ID del producto
 router.get("/:productId/bids", async (req, res) => {
@@ -157,5 +163,69 @@ router.delete("/d/:bidId", async (req, res) => {
         res.status(500).json({ message: 'Error al eliminar la puja', error });
     }
 });
+
+router.get("/:userId/bids", async (req, res) => {
+    const { userId } = req.params;
+    const { productId, sortBy = "bidTime", order = "desc" } = req.query;
+
+    try {
+        // Validar si el userId es válido
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "ID de usuario inválido" });
+        }
+
+        // Construir el filtro
+        const filter = { userId };
+        if (productId) {
+            filter.auctionId = productId; // Filtrar por producto si se proporciona
+        }
+
+        // Construir el orden
+        const sortOptions = {};
+        sortOptions[sortBy] = order === "asc" ? 1 : -1;
+
+        // Obtener las pujas del usuario
+        const userBids = await Bid.find(filter)
+            .sort(sortOptions)
+            .populate("auctionId", "name currentPrice endTime"); // Incluir detalles del producto
+
+        // Filtrar solo las subastas que el usuario ganó
+        const wonBids = await Promise.all(
+            userBids.map(async (bid) => {
+                const product = bid.auctionId;
+
+                // Obtener la puja más alta para esta subasta
+                const highestBid = await Bid.findOne({ auctionId: product._id })
+                    .sort({ bidAmount: -1 })
+                    .limit(1);
+
+                // Verificar si el usuario ganó la subasta
+                if (highestBid && highestBid.userId.toString() === userId) {
+                    return {
+                        id: bid._id,
+                        name: product.name,
+                        finalPrice: bid.bidAmount,
+                        date: bid.bidTime.toLocaleDateString(),
+                        image: product.image, // Asume que el producto tiene un campo "image"
+                        status: "won", // Estado de la subasta
+                    };
+                }
+                return null;
+            })
+        );
+
+        // Eliminar valores nulos (subastas no ganadas)
+        const filteredWonBids = wonBids.filter((bid) => bid !== null);
+
+        res.status(200).json({
+            success: true,
+            data: filteredWonBids,
+        });
+    } catch (error) {
+        console.error("Error al obtener el historial de pujas:", error);
+        res.status(500).json({ message: "Error al obtener el historial de pujas", error });
+    }
+});
+
 
 module.exports = router;
