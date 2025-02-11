@@ -11,11 +11,23 @@ const bidRoutes = require("./routes/bidRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Configurar CORS
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",")
+  : process.env.CORS_ORIGIN || "*";
+
+// Configurar CORS para Web y Móviles
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || process.env.CORS_ORIGINS , // Usa el valor en .env o "*" como predeterminado
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
