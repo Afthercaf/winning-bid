@@ -1,13 +1,11 @@
 const { Server } = require('socket.io');
-const http = require('http');
 
 class WebSocketManager {
-    constructor(app) {
-        this.server = http.createServer(app);
-        this.io = new Server(this.server, {
+    constructor(server) {
+        this.io = new Server(server, {
             cors: {
-                origin: "*",
-            }
+                origin: "*", // Permite conexiones desde cualquier origen
+            },
         });
 
         this.setupSocketEvents();
@@ -16,25 +14,22 @@ class WebSocketManager {
     setupSocketEvents() {
         this.io.on("connection", (socket) => {
             console.log("Nuevo cliente conectado");
-        
+
+            // Unirse a una sala específica (productId)
             socket.on("joinRoom", (productId) => {
                 console.log(`Cliente unido al room: ${productId}`);
                 socket.join(productId);
             });
-        
+
+            // Manejar la desconexión
             socket.on("disconnect", () => {
                 console.log("Cliente desconectado");
             });
         });
-        
-    }
-
-    getServer() {
-        return this.server; // Devolvemos el servidor HTTP
     }
 
     getIO() {
-        return this.io; // Devolvemos la instancia de Socket.IO
+        return this.io; // Devuelve la instancia de Socket.IO
     }
 }
 
