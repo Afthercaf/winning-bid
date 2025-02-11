@@ -48,14 +48,7 @@ router.post("/:productId/bid-j", async (req, res) => {
         }
 
         // Obtener la puja más alta existente
-        const highestBid = await Bid.findOne({ auctionId: productId })
-            .sort({ bidAmount: -1 })
-            .session(session);
-
-        const minValidPrice = highestBid ? highestBid.bidAmount : product.startingPrice;
-        if (bidAmount <= minValidPrice) {
-            throw new Error(`La puja debe ser mayor a $${minValidPrice}`);
-        }
+        await validateBid(product, bidAmount);
 
         // Actualizar o crear la puja del usuario
         const existingBid = await Bid.findOne({ auctionId: productId, userId }).session(session);
