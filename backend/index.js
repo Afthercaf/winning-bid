@@ -7,7 +7,7 @@ require("dotenv").config();
 
 const allRouter = require("./routes/allRouter");
 const bidRoutes = require("./routes/bidRoutes");
-
+require("./cron/auctionCron");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -64,6 +64,7 @@ app.use((req, res, next) => {
 // Usar el router consolidado
 app.use("/api", allRouter);
 app.use("/api/bids", bidRoutes);
+
 
 // Endpoint para crear o actualizar usuarios
 app.post("/api/users", async (req, res) => {
