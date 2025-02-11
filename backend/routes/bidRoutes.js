@@ -28,27 +28,37 @@ router.post("/:productId/bid-j", async (req, res) => {
         const { productId } = req.params;
         const { userId, bidAmount } = req.body;
 
-        // Validar los datos
         if (!mongoose.Types.ObjectId.isValid(userId) ||
             !mongoose.Types.ObjectId.isValid(productId) ||
             bidAmount <= 0) {
             throw new Error("Parámetros de entrada inválidos");
         }
 
-        // Buscar usuario y producto dentro de la transacción
         const user = await User.findById(userId).session(session);
         const product = await Product.findById(productId).session(session);
 
         if (!user) throw new Error("Usuario no encontrado");
         if (!product || product.type !== "subasta") throw new Error("Producto no válido");
 
-        // Verificar si la subasta ha terminado
         if (product.endTime && product.endTime < new Date()) {
             throw new Error("La subasta ha finalizado");
         }
 
         // Obtener la puja más alta existente
-        await validateBid(product, bidAmount);
+        const highestBid = await Bid.findOne({ auctionId: productId })
+            .sort({ bidAmount: -1 })
+            .session(session);
+
+        const minValidPrice = highestBid ? highestBid.bidAmount : product.startingPrice;
+        if (bidAmount <= minValidPrice) {
+            throw new Error(`La puja debe ser mayor a $${minValidPrice}`);
+        }
+
+        // Verificar si el usuario que tenía la puja más alta perdió su lugar
+        let lostUserId = null;
+        if (highestBid && highestBid.userId.toString() !== userId) {
+            lostUserId = highestBid.userId;
+        }
 
         // Actualizar o crear la puja del usuario
         const existingBid = await Bid.findOne({ auctionId: productId, userId }).session(session);
@@ -68,32 +78,33 @@ router.post("/:productId/bid-j", async (req, res) => {
             await newBid.save({ session });
         }
 
-        // Actualizar el precio actual del producto de forma atómica
         await Product.findByIdAndUpdate(
             productId,
             { $set: { currentPrice: bidAmount } },
             { session }
         );
 
-        // Obtener las 5 mejores pujas
-        const topBids = await Bid.find({ auctionId: productId })
-            .sort({ bidAmount: -1 })
-            .limit(5)
-            .session(session);
+        // 📌 Notificar al usuario que perdió el primer lugar
+        if (lostUserId) {
+            const lostUser = await User.findById(lostUserId).session(session);
+            if (lostUser && lostUser.oneSignalId) {
+                await sendNotification(
+                    lostUser.oneSignalId,
+                    "Has perdido el primer puesto en la subasta",
+                    `Alguien ha superado tu oferta en ${product.name}. ¡Haz una nueva puja para recuperarlo!`
+                );
+            }
+        }
 
-        // Emitir actualización de puja a través de WebSocket
-        req.io.to(productId).emit('bidUpdate', {
-            productId,
-            currentPrice: bidAmount,
-            topBids: topBids.map(bid => ({
-                userId: bid.userId,
-                userName: bid.userName,
-                bidAmount: bid.bidAmount,
-                timestamp: bid.bidTime,
-            })),
-        });
+        // 📌 Notificar al usuario que ahora es el nuevo líder
+        if (user.oneSignalId) {
+            await sendNotification(
+                user.oneSignalId,
+                "¡Eres el líder de la subasta!",
+                `Tu puja es la más alta en ${product.name}. ¡Mantente atento!`
+            );
+        }
 
-        // Confirmar la transacción
         await session.commitTransaction();
         res.status(200).json({ message: "Puja aceptada con éxito" });
     } catch (error) {
