@@ -65,38 +65,35 @@ router.post("/:productId/bid-j", async (req, res) => {
             await newBid.save({ session });
         }
 
-        await Product.findByIdAndUpdate(
+        // Actualizar el precio actual del producto
+        await Product.findByIdAndUpdate(productId, {
+            currentPrice: bidAmount,
+        }, { session });
+
+        const topBids = await Bid.find({ auctionId: productId })
+            .sort({ bidAmount: -1 })
+            .limit(5)
+            .session(session);
+
+        // Emitir el evento de WebSocket
+        req.io.to(productId).emit('bidUpdate', {
             productId,
-            { $set: { currentPrice: bidAmount } },
-            { session }
-        );
-
-        // 📌 Notificar al usuario que perdió el primer lugar
-        if (lostUserId) {
-            const lostUser = await User.findById(lostUserId).session(session);
-            if (lostUser && lostUser.oneSignalId) {
-                await sendNotification(
-                    lostUser.oneSignalId,
-                    "Has perdido el primer puesto en la subasta",
-                    `Alguien ha superado tu oferta en ${product.name}. ¡Haz una nueva puja para recuperarlo!`
-                );
-            }
-        }
-
-        // 📌 Notificar al usuario que ahora es el nuevo líder
-        if (user.oneSignalId) {
-            await sendNotification(
-                user.oneSignalId,
-                "¡Eres el líder de la subasta!",
-                `Tu puja es la más alta en ${product.name}. ¡Mantente atento!`
-            );
-        }
+            currentPrice: bidAmount,
+            topBids: topBids.map(bid => ({
+                userId: bid.userId,
+                userName: bid.userName,
+                bidAmount: bid.bidAmount,
+                timestamp: bid.bidTime,
+            })),
+        });
 
         await session.commitTransaction();
-        res.status(200).json({ message: "Puja aceptada con éxito" });
+        res.status(200).json({ message: "Puja actualizada con éxito" });
+        console.log("Puja actualizada con éxito");
     } catch (error) {
         await session.abortTransaction();
-        res.status(400).json({ message: error.message || "Error al realizar la puja" });
+        res.status(400).json({ message: error.message || "Error al crear o actualizar la puja" });
+        console.error("Error al crear o actualizar la puja:", error);
     } finally {
         session.endSession();
     }
