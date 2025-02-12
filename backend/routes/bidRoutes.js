@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Bid = require("../models/Bid");
 const Product = require("../models/Product");
 const User = require("../models/User");
+const sendNotification = require("../onesignal"); 
 
 const router = express.Router();
 
@@ -23,82 +24,100 @@ const validateBid = async (product, bidAmount) => {
 router.post("/:productId/bid-j", async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
-
+  
     try {
-        const { productId } = req.params;
-        const { userId, bidAmount } = req.body;
-
-        if (!mongoose.Types.ObjectId.isValid(userId) ||
-            !mongoose.Types.ObjectId.isValid(productId) ||
-            bidAmount <= 0) {
-            throw new Error("Parámetros de entrada inválidos");
-        }
-
-        const user = await User.findById(userId).session(session);
-        const product = await Product.findById(productId).session(session);
-
-        if (!user) throw new Error("Usuario no encontrado");
-        if (!product || product.type !== "subasta") throw new Error("Producto no válido");
-
-        if (product.endTime && product.endTime < new Date()) {
-            throw new Error("La subasta ha finalizado");
-        }
-
-        // Obtener la puja más alta existente
-        await validateBid(product, bidAmount);
-
-        // Actualizar o crear la puja del usuario
-        const existingBid = await Bid.findOne({ auctionId: productId, userId }).session(session);
-
-        if (existingBid) {
-            existingBid.bidAmount = bidAmount;
-            existingBid.bidTime = new Date();
-            await existingBid.save({ session });
-        } else {
-            const newBid = new Bid({
-                auctionId: productId,
-                userId,
-                userName: user.name,
-                bidAmount,
-                bidTime: new Date()
-            });
-            await newBid.save({ session });
-        }
-
-        // Actualizar el precio actual del producto
-        await Product.findByIdAndUpdate(productId, {
-            currentPrice: bidAmount,
-        }, { session });
-
-        const topBids = await Bid.find({ auctionId: productId })
-            .sort({ bidAmount: -1 })
-            .limit(5)
-            .session(session);
-
-        // Emitir el evento de WebSocket
-        req.io.to(productId).emit('bidUpdate', {
-            productId,
-            currentPrice: bidAmount,
-            topBids: topBids.map(bid => ({
-                userId: bid.userId,
-                userName: bid.userName,
-                bidAmount: bid.bidAmount,
-                timestamp: bid.bidTime,
-            })),
+      const { productId } = req.params;
+      const { userId, bidAmount } = req.body;
+  
+      // Validar los parámetros de entrada
+      if (!mongoose.Types.ObjectId.isValid(userId) ||
+          !mongoose.Types.ObjectId.isValid(productId) ||
+          bidAmount <= 0) {
+        throw new Error("Parámetros de entrada inválidos");
+      }
+  
+      // Buscar el usuario y el producto
+      const user = await User.findById(userId).session(session);
+      const product = await Product.findById(productId).session(session);
+  
+      if (!user) throw new Error("Usuario no encontrado");
+      if (!product || product.type !== "subasta") throw new Error("Producto no válido");
+  
+      if (product.endTime && product.endTime < new Date()) {
+        throw new Error("La subasta ha finalizado");
+      }
+  
+      // Validar la puja
+      await validateBid(product, bidAmount);
+  
+      // Actualizar o crear la puja
+      const existingBid = await Bid.findOne({ auctionId: productId, userId }).session(session);
+  
+      if (existingBid) {
+        existingBid.bidAmount = bidAmount;
+        existingBid.bidTime = new Date();
+        await existingBid.save({ session });
+      } else {
+        const newBid = new Bid({
+          auctionId: productId,
+          userId,
+          userName: user.name,
+          bidAmount,
+          bidTime: new Date(),
         });
-
-        await session.commitTransaction();
-        res.status(200).json({ message: "Puja actualizada con éxito" });
-        console.log("Puja actualizada con éxito");
+        await newBid.save({ session });
+      }
+  
+      // Actualizar el precio actual del producto
+      await Product.findByIdAndUpdate(productId, {
+        currentPrice: bidAmount,
+      }, { session });
+  
+      // Obtener las 5 pujas más altas
+      const topBids = await Bid.find({ auctionId: productId })
+        .sort({ bidAmount: -1 })
+        .limit(5)
+        .session(session);
+  
+      // Emitir el evento de WebSocket
+      req.io.to(productId).emit('bidUpdate', {
+        productId,
+        currentPrice: bidAmount,
+        topBids: topBids.map(bid => ({
+          userId: bid.userId,
+          userName: bid.userName,
+          bidAmount: bid.bidAmount,
+          timestamp: bid.bidTime,
+        })),
+      });
+  
+      // Notificar al usuario que perdió y al ganador
+      const previousWinner = await Bid.findOne({ auctionId: productId })
+        .sort({ bidAmount: -1 })
+        .limit(1);
+  
+      // Enviar notificaciones si hay un nuevo ganador
+      if (previousWinner && previousWinner.userId.toString() !== userId) {
+        const previousWinnerPlayerId = await User.findById(previousWinner.userId).select('playerId');
+        const newWinnerPlayerId = await User.findById(userId).select('playerId');
+  
+        // Notificar al anterior ganador
+        await sendNotification(previousWinnerPlayerId.playerId, `Has perdido el primer lugar en la subasta de ${product.name}`);
+  
+        // Notificar al nuevo ganador
+        await sendNotification(newWinnerPlayerId.playerId, `¡Felicidades! Has ganado la subasta de ${product.name}`);
+      }
+  
+      await session.commitTransaction();
+      res.status(200).json({ message: "Puja actualizada con éxito" });
     } catch (error) {
-        await session.abortTransaction();
-        res.status(400).json({ message: error.message || "Error al crear o actualizar la puja" });
-        console.error("Error al crear o actualizar la puja:", error);
+      await session.abortTransaction();
+      res.status(400).json({ message: error.message || "Error al crear o actualizar la puja" });
     } finally {
-        session.endSession();
+      session.endSession();
     }
-});
-
+  });
+  
 
 // Ruta para obtener las ofertas por ID del producto
 router.get("/:productId/bids", async (req, res) => {

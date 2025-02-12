@@ -42,7 +42,6 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    oneSignalId: { type: String }, // ID de OneSignal para notificaciones
 });
 
 // Crear el modelo de usuario usando el esquema definido

@@ -1,26 +1,26 @@
-const OneSignal = require("onesignal-node");
+const OneSignal = require('onesignal-node');
 
-const oneSignalClient = new OneSignal.Client({
-    userAuthKey: process.env.ONESIGNAL_USER_AUTH_KEY,
-    app: { 
-        appAuthKey: process.env.ONESIGNAL_APP_AUTH_KEY, 
-        appId: process.env.ONESIGNAL_APP_ID 
-    }
+// Crear cliente de OneSignal
+const client = new OneSignal.Client({
+  app: {
+    appId: 'daf91c82-2378-4c24-8104-2a9c05a1cc9c', // App ID de OneSignal
+    appAuthKey: 'z2loji2xme36e4uzs6skbrrrk', // API key de OneSignal
+  },
 });
 
-const sendNotification = async (userId, title, message) => {
-    try {
-        const notification = {
-            headings: { en: title },
-            contents: { en: message },
-            include_external_user_ids: [userId], // Se usa el userId de OneSignal
-        };
+// Función para enviar notificación
+const sendNotification = async (playerId, message) => {
+  try {
+    const notification = {
+      contents: { en: message },
+      include_player_ids: [playerId], // ID de dispositivo
+    };
 
-        await oneSignalClient.createNotification(notification);
-        console.log(`📩 Notificación enviada a ${userId}: ${title}`);
-    } catch (error) {
-        console.error("❌ Error al enviar notificación:", error);
-    }
+    const response = await client.createNotification(notification);
+    console.log('Notificación enviada:', response);
+  } catch (error) {
+    console.error('Error al enviar la notificación:', error);
+  }
 };
 
-module.exports = { sendNotification };
+module.exports = sendNotification;
