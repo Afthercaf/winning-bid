@@ -7,7 +7,7 @@ require("dotenv").config();
 
 const allRouter = require("./routes/allRouter");
 const bidRoutes = require("./routes/bidRoutes");
-require("./cron/auctionCron");
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
