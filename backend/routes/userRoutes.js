@@ -18,7 +18,7 @@ router.delete('/:id', userController.deleteUser);
 // Ruta para obtener el avatar del usuario actual
 router.get('/:id/avatar', userController.getAvatar);
 
-app.post('/save-player-id', async (req, res) => {
+router.post('/save-player-id', async (req, res) => {
     const { userId, playerId } = req.body;
   
     try {
