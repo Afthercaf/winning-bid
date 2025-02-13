@@ -175,29 +175,51 @@ router.get("/:userId/bids", async (req, res) => {
 
 // Obtener subastas en las que el usuario ha participado
 router.get("/:userId/participated-auctions", async (req, res) => {
-  const { userId } = req.params;
+    const { userId } = req.params;
 
-  try {
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-          return res.status(400).json({ message: "ID de usuario inválido" });
-      }
+    try {
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "ID de usuario inválido" });
+        }
 
-      // Obtener los IDs de las subastas donde el usuario ha pujado
-      const participatedAuctionIds = await Bid.distinct("auctionId", { userId });
+        // Usar agregación para unir Bid y Product en una sola consulta
+        const participatedAuctions = await Bid.aggregate([
+            // Filtrar por userId
+            { $match: { userId: mongoose.Types.ObjectId(userId) } },
+            // Unir con la colección Product
+            {
+                $lookup: {
+                    from: "products", // Nombre de la colección de Product en la base de datos
+                    localField: "auctionId",
+                    foreignField: "_id",
+                    as: "auctionDetails"
+                }
+            },
+            // Descomponer el array resultante de $lookup
+            { $unwind: "$auctionDetails" },
+            // Seleccionar solo los campos necesarios
+            {
+                $project: {
+                    bidId: "$_id",
+                    bidAmount: 1,
+                    bidTime: 1,
+                    "auctionDetails.name": 1,
+                    "auctionDetails.currentPrice": 1,
+                    "auctionDetails.endTime": 1,
+                    "auctionDetails.image": 1,
+                    "auctionDetails.type": 1
+                }
+            }
+        ]);
 
-      if (!participatedAuctionIds.length) {
-          return res.status(200).json({ success: true, data: [] });
-      }
+        if (!participatedAuctions.length) {
+            return res.status(200).json({ success: true, data: [] });
+        }
 
-      // Obtener detalles de las subastas en las que ha participado
-      const participatedAuctions = await Product.find({ _id: { $in: participatedAuctionIds } })
-          .select("name currentPrice endTime image type")
-          .lean();
-
-      res.status(200).json({ success: true, data: participatedAuctions });
-  } catch (error) {
-      res.status(500).json({ message: "Error al obtener subastas en las que ha participado", error });
-  }
+        res.status(200).json({ success: true, data: participatedAuctions });
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener subastas en las que ha participado", error });
+    }
 });
 
 
