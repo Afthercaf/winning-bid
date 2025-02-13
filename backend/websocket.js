@@ -16,12 +16,12 @@ class WebSocketManager {
     setupSocketEvents() {
         this.io.on("connection", (socket) => {
             console.log("Nuevo cliente conectado");
-
+        
             socket.on("joinRoom", (productId) => {
                 console.log(`Cliente unido al room: ${productId}`);
                 socket.join(productId);
             });
-
+        
             socket.on("disconnect", () => {
                 console.log("Cliente desconectado");
             });
