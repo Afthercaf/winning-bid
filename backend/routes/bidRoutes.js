@@ -182,22 +182,26 @@ router.get("/:userId/participated-auctions", async (req, res) => {
             return res.status(400).json({ message: "ID de usuario inválido" });
         }
 
-        // Usar agregación para unir Bid y Product en una sola consulta
+        const objectIdUserId = new mongoose.Types.ObjectId(userId);
+
+        // Verificar si el usuario existe antes de continuar
+        const userExists = await User.findById(objectIdUserId);
+        if (!userExists) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        // Obtener subastas en las que el usuario ha participado
         const participatedAuctions = await Bid.aggregate([
-            // Filtrar por userId
-            { $match: { userId: mongoose.Types.ObjectId(userId) } },
-            // Unir con la colección Product
+            { $match: { userId: objectIdUserId } }, // Filtrar por userId
             {
                 $lookup: {
-                    from: "products", // Nombre de la colección de Product en la base de datos
+                    from: "products", // Nombre de la colección de productos en la base de datos
                     localField: "auctionId",
                     foreignField: "_id",
                     as: "auctionDetails"
                 }
             },
-            // Descomponer el array resultante de $lookup
-            { $unwind: "$auctionDetails" },
-            // Seleccionar solo los campos necesarios
+            { $unwind: { path: "$auctionDetails", preserveNullAndEmptyArrays: true } }, // Descomponer el array resultante de $lookup
             {
                 $project: {
                     bidId: "$_id",
@@ -212,13 +216,14 @@ router.get("/:userId/participated-auctions", async (req, res) => {
             }
         ]);
 
-        if (!participatedAuctions.length) {
+        if (!participatedAuctions || participatedAuctions.length === 0) {
             return res.status(200).json({ success: true, data: [] });
         }
 
         res.status(200).json({ success: true, data: participatedAuctions });
     } catch (error) {
-        res.status(500).json({ message: "Error al obtener subastas en las que ha participado", error });
+        console.error("Error al obtener subastas:", error);
+        res.status(500).json({ message: "Error interno del servidor", error: error.message });
     }
 });
 
