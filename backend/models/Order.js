@@ -32,7 +32,12 @@ const orderSchema = new mongoose.Schema({
     updated_at: {
         type: Date,
         default: Date.now
+    },
+    conekta_order_id: {
+        type: String,
+        required: true
     }
+
 });
 
 const Order = mongoose.model('Order', orderSchema);
