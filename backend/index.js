@@ -139,3 +139,6 @@ app.get("/api/bids2/:productId", async (req, res) => {
     res.status(500).json({ status: "error", message: "Error al obtener las ofertas" });
   }
 });
+
+
+
