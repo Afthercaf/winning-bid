@@ -1,29 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const orderController = require('../controllers/orderController');
+const orderController = require('../controllers/orderController'); // Asegúrate de que la ruta sea correcta
 
-// Crear orden
-router.post('/', orderController.createOrder);
+// 🔹 *Ruta para crear una orden con Conekta (OXXO)*
+router.post('/create-order-conekta', orderController.createOrderC);
 
-// Obtener todas las órdenes
-router.get('/', orderController.getOrders);
+// 🔹 *Ruta para crear una orden y generar notificaciones*
+router.post('/create-order', orderController.createOrder);
 
-// Obtener los últimos productos vendidos
-router.get('/last-sold-products', orderController.getLastSoldProducts);
-
-// Obtener ventas mensuales
-router.get('/monthly-sales', orderController.getMonthlySales);
-router.get('/product/:productId', orderController.getOrdersByProductId);
-// Obtener una orden por ID
-router.get('/:id', orderController.getOrderById);
-
-// Actualizar el estado de una orden por ID
-router.put('/finalize/:id', orderController.finalizeOrder);
-
-// Eliminar una orden por ID
-router.delete('/:id', orderController.deleteOrder);
-
-// Obtener el total de productos vendidos
-router.get('/productos-vendidos', orderController.getProductosVendidos);
+// 🔹 *Ruta para obtener los detalles de una orden*
+router.get('/order-details/:orderId', orderController.getOrderDetails);
 
 module.exports = router;
