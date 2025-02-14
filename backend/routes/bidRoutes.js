@@ -127,7 +127,7 @@ router.delete("/d/:bidId", async (req, res) => {
 });
 
 // Obtener subastas en las que el usuario ha participado y si ganó alguna
-router.get("/:userId/bids", async (req, res) => {
+router.get("/:userId/bids2", async (req, res) => {
     const { userId } = req.params;
 
     try {
@@ -209,8 +209,8 @@ router.get("/:userId/participated-auctions", async (req, res) => {
                     bidTime: 1,
                     "auctionDetails.name": 1,
                     "auctionDetails.currentPrice": 1,
-                    "auctionDetails.endTime": 1,
-                    "auctionDetails.image": 1,
+                    "auctionDetails.auctionEndTime": 1,
+                    "auctionDetails.images": 1,
                     "auctionDetails.type": 1
                 }
             }
