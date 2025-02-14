@@ -1,6 +1,143 @@
+const { CustomersApi, Configuration, OrdersApi } = require("conekta");
 const Order = require('../models/Order');
 const Notification = require('../models/Notification');
+const User = require("../models/User");
+const Product = require("../models/Product");
+const mongoose = require('mongoose');
+const Conekta = require('conekta');
+const axios = require('axios');
+const Bid = require("../models/Bid");
 
+// 🔹 *Configuración de Conekta*
+const API_KEY = "key_lucr1u8feoEOd6BY9nQuPZp"; // Reemplaza con tu clave privada
+const config = new Configuration({ accessToken: API_KEY });
+const customersClient = new CustomersApi(config);
+const ordersClient = new OrdersApi(config);
+
+// 🔹 *Función para validar ObjectId de MongoDB*
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// 🔹 *Función reutilizable para manejar errores*
+const handleError = (res, message, error) => {
+  console.error(`❌ ${message}:`, error);
+    return res.status(500).json({ message, error: error.message });
+};
+
+
+
+// 🔹 *Crear un Cliente en Conekta si no existe*
+const createCustomerIfNotExists = async (user) => {
+    try {
+        console.log("🔍 Buscando cliente en Conekta...");
+        const customerData = {
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+        };
+
+        const customerResponse = await customersClient.createCustomer(customerData);
+        console.log("✔ Cliente creado en Conekta:", customerResponse.data.id);
+        return customerResponse.data.id;
+    } catch (error) {
+        console.error("❌ Error creando el cliente en Conekta:", error);
+        throw new Error("Error al crear el cliente en Conekta");
+    }
+};
+
+exports.createOrderC = async (req, res) => {
+  try {
+    const { userId, productId } = req.body;
+
+    console.log("📌 ID de producto recibido:", productId);
+    console.log("📌 ID de usuario recibido:", userId);
+    console.log("📌 Método de pago: OXXO");
+
+    // 🔹 *Validar IDs*
+    if (!isValidObjectId(userId) || !isValidObjectId(productId)) {
+      return res.status(400).json({ message: "ID de usuario o producto no válido" });
+    }
+
+    // 🔹 *Obtener Producto*
+    const product = await Product.findById(productId);
+    if (!product) return res.status(404).json({ message: "Producto no encontrado" });
+
+    console.log("✔ Producto encontrado:", product.name);
+
+    // 🔹 *Obtener Usuario*
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    console.log("✔ Usuario encontrado:", user.name);
+
+    // 🔹 *Definir el precio*
+    const price = product.currentPrice || product.startingPrice;
+    console.log("💰 Precio a pagar:", price);
+
+    // 🔹 *Obtener o Crear Cliente en Conekta*
+    let customerId;
+    try {
+      customerId = await createCustomerIfNotExists(user);
+    } catch (error) {
+      return handleError(res, "Error al crear el cliente en Conekta", error);
+    }
+
+    // 🔹 *Crear Orden en Conekta (Solo OXXO)*
+    const orderRequest = {
+      currency: "MXN",
+      customer_info: {
+        customer_id: customerId,
+      },
+      line_items: [
+        {
+          name: product.name,
+          unit_price: price * 100, // Conekta usa centavos
+          quantity: 1,
+        },
+      ],
+      charges: [
+        {
+          payment_method: {
+            type: "oxxo_cash",
+            expires_at: Math.floor(Date.now() / 1000) + 3 * 24 * 60 * 60, // Expira en 3 días
+          },
+        },
+      ],
+    };
+
+    console.log("📤 Enviando solicitud de orden a Conekta...");
+    const orderResponse = await ordersClient.createOrder(orderRequest);
+
+    console.log("✔ Orden creada en Conekta:", orderResponse.data.id);
+
+    // 🔹 *Guardar la Orden en la Base de Datos*
+    const newOrder = new Order({
+      product_id: productId,
+      buyer_id: userId,
+      seller_id: product.seller_id,
+      price,
+      status: "pendiente",
+      conekta_order_id: orderResponse.data.id,
+    });
+
+    await newOrder.save();
+    console.log("✔ Orden guardada en la base de datos:", newOrder);
+
+    // 🔹 *Obtener la información de pago de OXXO*
+    const chargeData = orderResponse.data.charges.data[0]?.payment_method || {};
+    const responsePayload = {
+      message: "Orden creada correctamente",
+      orderId: newOrder._id,
+      reference: chargeData.reference || "N/A",
+      barcodeUrl: chargeData.barcode_url || "N/A",
+      paymentStatus: orderResponse.data.payment_status || "N/A",
+    };
+
+    res.status(200).json(responsePayload);
+
+  } catch (error) {
+    return handleError(res, "❌ Error general al crear la orden en Conekta", error);
+  }
+};
 // Crear una nueva orden y generar notificaciones
 exports.createOrder = async (req, res) => {
     try {
@@ -37,175 +174,49 @@ exports.createOrder = async (req, res) => {
     }
 };
 
+// 🔹 *Obtener los detalles de una orden*
+exports.getOrderDetails = async (req, res) => {
+  try {
+      const { orderId } = req.params;
 
-// Obtener todas las órdenes
-exports.getOrders = async (req, res) => {
-    try {
-        const orders = await Order.find()
-            .populate('product_id', 'title')
-            .populate('buyer_id', 'name email')
-            .populate('seller_id', 'name email');
-        res.status(200).json(orders);
-    } catch (error) {
-        res.status(500).json({ error: 'Error obteniendo las órdenes: ' + error.message });
-    }
-};
+      console.log('📌 ID de la orden recibida:', orderId);
 
-// Obtener una orden por ID
-exports.getOrderById = async (req, res) => {
-    try {
-        const order = await Order.findById(req.params.id)
-            .populate('product_id', 'title')
-            .populate('buyer_id', 'name email')
-            .populate('seller_id', 'name email');
-        if (!order) return res.status(404).json({ message: 'Orden no encontrada' });
-        res.status(200).json(order);
-    } catch (error) {
-        res.status(500).json({ error: 'Error obteniendo la orden: ' + error.message });
-    }
-};
-
-// Endpoint para finalizar la venta
-exports.finalizeOrder = async (req, res) => {
-    try {
-      const orderId = req.params.id;
-      const updatedOrder = await Order.findByIdAndUpdate(
-        orderId,
-        { status: 'completado' },
-        { new: true }
-      );
-  
-      if (!updatedOrder) {
-        return res.status(404).json({ message: 'Orden no encontrada' });
+      // Verificar que el ID es un ObjectId válido
+      if (!mongoose.Types.ObjectId.isValid(orderId)) {
+          return res.status(400).json({ message: 'ID de la orden no válido' });
       }
-  
-      // Crear la notificación para el comprador
-      const notification = new Notification({
-        user_id: updatedOrder.buyer_id,
-        message: 'Su compra ha sido confirmada y finalizada.'
+
+      // Buscar la orden en la base de datos
+      const order = await Order.findById(orderId);
+      if (!order) return res.status(404).json({ message: 'Orden no encontrada' });
+
+      console.log('✔ Orden encontrada:', order);
+
+        // Obtener información del usuario
+        const user = await User.findById(order.buyer_id);
+        if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+      // Realizar la solicitud HTTP a la API de Conekta
+      const response = await axios.get(`https://api.conekta.io/orders/${order.conekta_order_id}`, {
+          headers: {
+              'Accept': 'application/vnd.conekta-v2.0.0+json',
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${API_KEY}`
+          }
       });
-      await notification.save();
-  
-      res.status(200).json(updatedOrder);
-    } catch (error) {
-      console.error("Error al finalizar la orden:", error);
-      res.status(500).json({ error: 'Error al finalizar la orden' });
-    }
-  };
-  
 
+      console.log('Detalles de la orden en Conekta:', response.data);
 
-// Eliminar una orden por ID
-exports.deleteOrder = async (req, res) => {
-    try {
-        const order = await Order.findByIdAndDelete(req.params.id);
-        if (!order) return res.status(404).json({ message: 'Orden no encontrada' });
-        res.status(200).json({ message: 'Orden eliminada correctamente' });
-    } catch (error) {
-        res.status(500).json({ error: 'Error eliminando la orden: ' + error.message });
-    }
+      // Devolver los detalles de la orden en formato JSON
+      res.status(200).json({
+          paymentReference: response.data.charges.data[0].payment_method.reference,
+          barcodeUrl: response.data.charges.data[0].payment_method.barcode_url,
+          order: order,
+          winnerName: user.name, // Agregar el nombre del ganador
+          conektaDetails: response.data
+      });
+  } catch (error) {
+      console.error('Error al obtener los detalles de la orden:', error);
+      res.status(500).json({ message: 'Error al obtener los detalles de la orden', error: error.message });
+  }
 };
-
-// Obtener ganancias totales y cambio porcentual en el último mes
-exports.getGanancias = async (req, res) => {
-    try {
-        const fechaActual = new Date();
-        const primerDiaMesActual = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
-        const primerDiaMesAnterior = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 1, 1);
-        const ultimoDiaMesAnterior = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 0);
-
-        const ordenesMesActual = await Order.find({
-            status: 'completado',
-            created_at: { $gte: primerDiaMesActual }
-        });
-
-        const ordenesMesAnterior = await Order.find({
-            status: 'completado',
-            created_at: { $gte: primerDiaMesAnterior, $lte: ultimoDiaMesAnterior }
-        });
-
-        const gananciasMesActual = ordenesMesActual.reduce((total, order) => total + order.price, 0);
-        const gananciasMesAnterior = ordenesMesAnterior.reduce((total, order) => total + order.price, 0);
-
-        let cambioPorcentual = 0;
-        if (gananciasMesAnterior > 0) {
-            cambioPorcentual = ((gananciasMesActual - gananciasMesAnterior) / gananciasMesAnterior) * 100;
-        }
-
-        res.status(200).json({
-            total: gananciasMesActual || 0,
-            cambioPorcentual: parseFloat(cambioPorcentual.toFixed(2)) || 0
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Error al obtener las ganancias: ' + error.message });
-    }
-};
-
-// Obtener el número total de productos vendidos
-exports.getProductosVendidos = async (req, res) => {
-    try {
-        const totalProductosVendidos = await Order.countDocuments({ status: 'completado' });
-        res.status(200).json({ total: totalProductosVendidos });
-    } catch (error) {
-        res.status(500).json({ error: 'Error obteniendo los productos vendidos: ' + error.message });
-    }
-};
-
-// Obtener los últimos 3 productos vendidos
-exports.getLastSoldProducts = async (req, res) => {
-    try {
-        const lastSoldProducts = await Order.find({ status: 'completado' })
-            .sort({ created_at: -1 })
-            .limit(3)
-            .populate('product_id', 'title');
-
-        res.status(200).json(lastSoldProducts);
-    } catch (error) {
-        res.status(500).json({ error: 'Error al obtener los últimos productos vendidos: ' + error.message });
-    }
-};
-
-// Obtener las ventas mensuales
-exports.getMonthlySales = async (req, res) => {
-    try {
-        const sales = await Order.aggregate([
-            { $match: { status: 'completado' } },
-            {
-                $group: {
-                    _id: { $month: '$created_at' },
-                    totalSales: { $sum: '$price' }
-                }
-            },
-            { $sort: { _id: 1 } }
-        ]);
-
-        const formattedSales = sales.map(sale => ({
-            month: sale._id,
-            totalSales: sale.totalSales
-        }));
-
-        res.status(200).json(formattedSales);
-    } catch (error) {
-        res.status(500).json({ error: 'Error al obtener las ventas mensuales: ' + error.message });
-    }
-};
-
-exports.getOrdersByProductId = async (req, res) => {
-    try {
-        const { productId } = req.params;
-        const orders = await Order.find({ product_id: productId })
-            .populate('buyer_id', 'name email')
-            .populate('seller_id', 'name email')
-            .populate('product_id', 'name price'); // Populamos datos del producto si es necesario
-
-        if (orders.length === 0) {
-            return res.status(404).json({ message: 'No se encontraron órdenes para este producto' });
-        }
-
-        res.status(200).json(orders);
-    } catch (error) {
-        console.error("Error al obtener las órdenes por productId:", error.message);
-        res.status(500).json({ error: 'Error al obtener las órdenes del producto' });
-    }
-};
-
