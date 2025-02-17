@@ -5,20 +5,24 @@ const productSchema = new mongoose.Schema({
     description: { type: String, required: true },
     category: { type: String, required: true },
     images: [{ type: String }], // Almacena URLs de las imágenes
-    type: { type: String, enum: ['venta', 'subasta'], required: true },
+    type: { 
+        type: String, 
+        enum: ['subasta'], // Solo "subasta"
+        required: true 
+    },
     auctionType: { 
         type: String, 
         enum: ['normal', 'flash'], 
-        required: false // Este campo es opcional, pero si es subasta, puede ser necesario
+        required: true 
     },
     flashDuration: { 
         type: Number, 
-        required: false, // Este campo solo es necesario si la subasta es tipo "flash"
-        min: 30, 
-        max: 120 // Minimo 30 minutos, máximo 2 horas (120 minutos)
+        required: function() { return this.auctionType === 'flash'; }, 
+        default: 60, // Duración por defecto de 1 hora (60 minutos)
+        min: 60, 
+        max: 60 // Solo permite 1 hora
     },
-    price: { type: Number },
-    startingPrice: { type: Number },
+    startingPrice: { type: Number, required: true },
     auctionEndTime: { type: Date },
     currentPrice: { type: Number, default: 0 },
     stock: { type: Number, default: 0 },
