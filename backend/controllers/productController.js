@@ -1,9 +1,14 @@
 import multer from 'multer';
 import { uploadImageToImgur } from "../imgurService.js"; // Asegúrate de usar la ruta correcta
 import Product from '../models/Product.js';
+import Bid from "../models/Bid.js"; 
+import WebSocketManager from '../websocket.js';
+
+
 
 // Configuración de multer
 const multerStorage = multer.memoryStorage();
+const websocketManager = new WebSocketManager();
 const upload = multer({
     storage: multerStorage,
     limits: { fileSize: 5 * 1024 * 1024 },
@@ -16,16 +21,19 @@ const upload = multer({
         cb(null, true);
     },
 });
-
-// Controlador para crear un producto
 export const createProduct = [
     upload.array('images', 5),
     async (req, res) => {
         try {
-            const { name, description, category, type, auctionType, flashDuration, price, stock, startingPrice, auctionEndTime } = req.body;
+            const { name, description, category, type, auctionType, flashDuration, startingPrice, auctionStartTime, auctionEndTime, puja1, puja2, puja3 } = req.body;
 
-            if (!name || !description || !category || !type) {
+            if (!name || !description || !category || !type || !puja1 || !puja2 || !puja3) {
                 return res.status(400).json({ error: 'Faltan datos obligatorios' });
+            }
+
+            const totalPujas = parseInt(puja1) + parseInt(puja2) + parseInt(puja3);
+            if (totalPujas !== 150) {
+                return res.status(400).json({ error: 'Las pujas deben sumar un total de 150.' });
             }
 
             // Subir imágenes a Imgur
@@ -49,14 +57,13 @@ export const createProduct = [
                 category,
                 type,
                 auctionType,
-                flashDuration,
+                flashDuration: auctionType === 'flash' ? 60 : undefined, // Solo permite 1 hora para flash
                 images: validImages,
-                price: type === 'venta' ? price : undefined,
-                stock: type === 'venta' ? stock : undefined,
                 startingPrice: type === 'subasta' ? startingPrice : undefined,
                 auctionEndTime: type === 'subasta' ? auctionEndTime : undefined,
                 seller_id: req.user.id,
                 currentPrice: type === 'subasta' ? startingPrice : undefined,
+                pujas: [parseInt(puja1), parseInt(puja2), parseInt(puja3)], // Añadir las pujas al producto
             });
 
             await newProduct.save();
@@ -67,6 +74,7 @@ export const createProduct = [
         }
     },
 ];
+
 
 
 // Obtener todos los productos
@@ -116,12 +124,16 @@ export const updateProductStatus = async (req, res) => {
             return res.status(404).json({ message: 'Producto no encontrado' });
         }
 
+        // 🔥 Emitir evento WebSocket cuando cambia el estado de un producto
+        websocketManager.notifyProductStatusChange(product);
+
         res.json({ message: 'Estado del producto actualizado', product });
     } catch (error) {
         console.error('Error al actualizar el estado del producto:', error.message);
         res.status(500).json({ message: 'Error al actualizar el estado del producto', error });
     }
 };
+
 
 
 // Obtener un producto por ID
@@ -202,29 +214,100 @@ export const getUserProducts = async (req, res) => {
     }
 };
 
-
-// Eliminar un producto por ID
-export const deleteProduct = async (req, res) => {
+export const getFlashAuctions = async (req, res) => {
     try {
-        const productId = req.params.productId;
+        const flashAuctions = await Product.aggregate([
+            { $match: { type: 'subasta', auctionType: 'flash', isActive: true } }, // Solo subastas flash activas
+            { $sample: { size: 3 } } // Aseguramos que siempre devuelva una lista de hasta 3 productos
+        ]);
 
-        // Verificar si el producto existe
-        const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).json({ message: 'Producto no encontrado' });
+        await Product.populate(flashAuctions, { path: 'seller_id', select: 'name email' });
+
+        if (!Array.isArray(flashAuctions) || flashAuctions.length === 0) {
+            return res.status(404).json([]); // ⬅️ Retorna un array vacío en lugar de un objeto
         }
 
-        // Verificar si el usuario autenticado es el propietario del producto
-        if (product.seller_id.toString() !== req.user.id) {
-            return res.status(403).json({ message: 'No tienes permiso para eliminar este producto' });
-        }
+        // Calculamos el tiempo restante para cada producto
+        const currentTime = new Date();
+        const formattedAuctions = flashAuctions.map(auction => ({
+            _id: auction._id,
+            name: auction.name,
+            description: auction.description.length > 200 ? auction.description.substring(0, 200) + '...' : auction.description,
+            image: auction.images.length > 0 ? auction.images[0] : "https://via.placeholder.com/200",
+            seller: auction.seller_id,
+            timeLeft: Math.max(0, Math.floor((new Date(auction.auctionEndTime) - currentTime) / 1000)), // Tiempo restante en segundos
+            currentPrice: auction.currentPrice || auction.startingPrice,
+        }));
 
-        // Eliminar el producto
-        await Product.findByIdAndDelete(productId);
+        res.status(200).json(formattedAuctions); // ⬅️ Aseguramos que siempre devuelve un array
 
-        res.status(200).json({ message: 'Producto eliminado correctamente' });
     } catch (error) {
-        console.error('Error al eliminar el producto:', error.message);
-        res.status(500).json({ message: 'Error al eliminar el producto', error });
+        console.error('❌ Error al obtener las subastas flash:', error.message);
+        res.status(500).json({ message: 'Error al obtener las subastas flash', error });
+    }
+};
+export const finalizarSubasta = async (req, res) => {
+    const { productId } = req.params;
+
+    try {
+        // Buscar la subasta en MongoDB
+        const product = await Product.findById(productId);
+
+        if (!product || product.type !== "subasta") {
+            return res.status(404).json({ error: "Subasta no encontrada" });
+        }
+
+        if (product.auctionEndTime > new Date()) {
+            return res.status(400).json({ error: "La subasta aún no ha finalizado" });
+        }
+
+        // Buscar todas las pujas en la colección `bids`
+        const bids = await Bid.find({ auctionId: productId }).sort({ bidAmount: -1 }); // Ordena de mayor a menor
+
+        if (!bids.length) {
+            console.log("⚠ No hay pujas registradas en la subasta:", productId);
+            return res.status(400).json({ error: "No hay pujas en esta subasta" });
+        }
+
+        // Obtener la puja más alta
+        const pujaMasAlta = bids[0];
+
+        console.log("🏆 Puja ganadora:", pujaMasAlta);
+
+        // Generar el voucher de OXXO Pay
+        let voucherUrl;
+        try {
+            voucherUrl = await generateOxxoPayment(
+                pujaMasAlta.bidAmount,
+                pujaMasAlta.userId // Asegúrate de que `userId` contiene el correo o información necesaria
+            );
+        } catch (paymentError) {
+            console.error("❌ Error al generar el voucher:", paymentError);
+            return res.status(500).json({ error: "No se pudo generar el voucher" });
+        }
+
+        // Notificar al ganador con WebSockets 🚀
+        websocketManager.notifyUser(pujaMasAlta.userId, {
+            type: "GANADOR_SUBASTA",
+            message: "¡Felicidades! Has ganado la subasta!",
+            voucherUrl,
+        });
+
+        // Notificar a los perdedores 🚀
+        bids.forEach(bid => {
+            if (bid.userId.toString() !== pujaMasAlta.userId.toString()) {
+                websocketManager.notifyUser(bid.userId, {
+                    type: "PERDEDOR_SUBASTA",
+                    message: `La subasta ha terminado. El ganador fue ${pujaMasAlta.userName}.`,
+                });
+            }
+        });
+
+        // Enviar respuesta al cliente
+        res.status(200).json({ voucherUrl });
+
+    } catch (error) {
+        console.error("❌ Error al finalizar la subasta:", error);
+        res.status(500).json({ error: "Error al finalizar la subasta" });
     }
 };
