@@ -3,94 +3,96 @@ const mongoose = require("mongoose");
 const Bid = require("../models/Bid");
 const Product = require("../models/Product");
 const User = require("../models/User");
-
+const WebSocketManager = require("../websocket");
 const router = express.Router();
 
 // Validación de pujas
 const validateBid = async (product, bidAmount) => {
-  const currentMaxBid = await Bid.findOne({ auctionId: product._id })
-      .sort({ bidAmount: -1 })
-      .select("bidAmount")
-      .lean();
+    const currentMaxBid = await Bid.findOne({ auctionId: product._id })
+        .sort({ bidAmount: -1 })
+        .select("bidAmount")
+        .lean();
 
-  const minValidPrice = currentMaxBid ? currentMaxBid.bidAmount : product.startingPrice;
-  if (bidAmount <= minValidPrice) {
-      throw new Error(`La puja debe ser mayor a $${minValidPrice}`);
-  }
-  return true;
+    const minValidPrice = currentMaxBid ? currentMaxBid.bidAmount : product.startingPrice;
+    if (bidAmount <= minValidPrice) {
+        throw new Error(`La puja debe ser mayor a $${minValidPrice}`);
+    }
+    return true;
 };
 
 // Ruta para crear o actualizar una puja
 router.post("/:productId/bid-j", async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+    const session = await mongoose.startSession();
+    try {
+        session.startTransaction();
 
-  try {
-      const { productId } = req.params;
-      const { userId, bidAmount } = req.body;
+        const { productId } = req.params;
+        const { userId, bidAmount } = req.body;
 
-      // Validación de parámetros de entrada
-      if (!mongoose.Types.ObjectId.isValid(userId) ||
-          !mongoose.Types.ObjectId.isValid(productId) ||
-          bidAmount <= 0) {
-          return res.status(400).json({ message: "Parámetros de entrada inválidos" });
-      }
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(productId) || bidAmount <= 0) {
+            return res.status(400).json({ message: "Parámetros de entrada inválidos" });
+        }
 
-      // Realizamos las consultas de usuario y producto en paralelo
-      const [user, product] = await Promise.all([
-          User.findById(userId).session(session),
-          Product.findById(productId).session(session)
-      ]);
+        const [user, product] = await Promise.all([
+            User.findById(userId).session(session),
+            Product.findById(productId).session(session),
+        ]);
 
-      if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
-      if (!product || product.type !== "subasta") return res.status(404).json({ message: "Producto no encontrado o no es una subasta" });
-      if (product.endTime && product.endTime < new Date()) return res.status(400).json({ message: "La subasta ha terminado" });
+        if (!user) throw new Error("Usuario no encontrado");
+        if (!product || product.type !== "subasta") throw new Error("Producto no encontrado o no es una subasta");
+        if (product.endTime && product.endTime < new Date()) throw new Error("La subasta ha terminado");
 
-      // Validación de la puja
-      await validateBid(product, bidAmount);
+        await validateBid(product, bidAmount);
 
-      // Verificar si el usuario ya tiene una puja
-      const existingBid = await Bid.findOne({ auctionId: productId, userId }).session(session);
+        let bid;
+        const existingBid = await Bid.findOne({ auctionId: productId, userId }).session(session);
 
-      if (existingBid) {
-          existingBid.bidAmount = bidAmount;
-          existingBid.bidTime = new Date();
-          await existingBid.save({ session });
-      } else {
-          await new Bid({ auctionId: productId, userId, userName: user.name, bidAmount, bidTime: new Date() }).save({ session });
-      }
+        if (existingBid) {
+            existingBid.bidAmount = bidAmount;
+            existingBid.bidTime = new Date();
+            await existingBid.save({ session });
+            bid = existingBid;
+        } else {
+            bid = await new Bid({
+                auctionId: productId,
+                userId,
+                userName: user.name,
+                bidAmount,
+                bidTime: new Date(),
+            }).save({ session });
+        }
 
-      // Actualizar el precio actual del producto
-      await Product.findByIdAndUpdate(productId, { currentPrice: bidAmount }, { session });
+        await Product.findByIdAndUpdate(productId, { currentPrice: bidAmount }, { session });
 
-      // Obtener las 5 pujas más altas y el total en paralelo
-      const [topBids, totalBids] = await Promise.all([
-          Bid.find({ auctionId: productId }).sort({ bidAmount: -1 }).limit(5).session(session),
-          Bid.countDocuments({ auctionId: productId })
-      ]);
+        // Obtener las mejores 5 ofertas para mostrar en tiempo real
+        const topBids = await Bid.find({ auctionId: productId })
+            .sort({ bidAmount: -1 })
+            .limit(5)
+            .lean();
 
-      // Emitir evento de WebSocket para actualizar la interfaz
-      req.io.to(productId).emit("bidUpdate", {
-          productId,
-          currentPrice: bidAmount,
-          topBids: topBids.map((bid) => ({
-              userId: bid.userId,
-              userName: bid.userName,
-              bidAmount: bid.bidAmount,
-              timestamp: bid.bidTime,
-          })),
-      });
+        await session.commitTransaction();
+        session.endSession();
 
-      await session.commitTransaction();
-      res.status(200).json({ message: "Puja actualizada con éxito" });
-  } catch (error) {
-      await session.abortTransaction();
-      res.status(400).json({ message: error.message || "Error al crear o actualizar la puja" });
-      console.error("Error al crear o actualizar la puja:", error);
-  } finally {
-      session.endSession();
-  }
+        // Emitir evento de WebSocket para actualizar la interfaz
+        req.io.to(productId).emit("bidUpdate", {
+            productId,
+            currentPrice: bidAmount,
+            topBids: topBids.map((bid) => ({
+                userId: bid.userId,
+                userName: bid.userName,
+                bidAmount: bid.bidAmount,
+                timestamp: bid.bidTime,
+            })),
+        });
+
+        res.status(200).json({ message: "Puja actualizada con éxito" });
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        res.status(400).json({ message: error.message || "Error al crear o actualizar la puja" });
+    }
 });
+
 
 // Obtener las pujas por ID del producto con paginación optimizada
 router.get("/:productId/bids", async (req, res) => {
