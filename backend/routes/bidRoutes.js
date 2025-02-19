@@ -6,7 +6,7 @@ const User = require("../models/User");
 const WebSocketManager = require("../websocket");
 const router = express.Router();
 
-// Validación de pujas
+// Función para validar una puja
 const validateBid = async (product, bidAmount) => {
     const currentMaxBid = await Bid.findOne({ auctionId: product._id })
         .sort({ bidAmount: -1 })
@@ -29,10 +29,12 @@ router.post("/:productId/bid-j", async (req, res) => {
         const { productId } = req.params;
         const { userId, bidAmount } = req.body;
 
+        // Validación de entrada
         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(productId) || bidAmount <= 0) {
             throw new Error("Parámetros de entrada inválidos");
         }
 
+        // Buscar usuario y producto dentro de la sesión
         const [user, product] = await Promise.all([
             User.findById(userId).session(session),
             Product.findById(productId).session(session),
@@ -42,17 +44,20 @@ router.post("/:productId/bid-j", async (req, res) => {
         if (!product || product.type !== "subasta") throw new Error("Producto no encontrado o no es una subasta");
         if (product.endTime && product.endTime < new Date()) throw new Error("La subasta ha terminado");
 
+        // Validar que la nueva puja sea mayor a la actual
         await validateBid(product, bidAmount);
 
         let bid;
         const existingBid = await Bid.findOne({ auctionId: productId, userId }).session(session);
 
         if (existingBid) {
+            // Actualizar puja existente
             existingBid.bidAmount = bidAmount;
             existingBid.bidTime = new Date();
             await existingBid.save({ session });
             bid = existingBid;
         } else {
+            // Crear nueva puja
             bid = await new Bid({
                 auctionId: productId,
                 userId,
@@ -62,21 +67,27 @@ router.post("/:productId/bid-j", async (req, res) => {
             }).save({ session });
         }
 
+        // Actualizar el precio actual del producto en la base de datos
         await Product.findByIdAndUpdate(productId, { currentPrice: bidAmount }, { session });
 
-        // Obtener las mejores 5 ofertas para mostrar en tiempo real
+        // Verificar si el precio se actualizó correctamente
+        const updatedProduct = await Product.findById(productId).lean();
+        console.log("Precio actual del producto actualizado:", updatedProduct.currentPrice);
+
+        // Obtener las 5 mejores ofertas para mostrar en la interfaz
         const topBids = await Bid.find({ auctionId: productId })
-            .sort({ bidAmount: -1 })
+            .sort({ bidAmount: -1, bidTime: 1 }) // Ordena por monto y luego por tiempo
             .limit(5)
             .lean();
 
+        // Confirmar transacción
         await session.commitTransaction();
         session.endSession();
 
-        // Emitir evento de WebSocket para actualizar la interfaz
+        // Emitir evento de WebSocket para actualizar la interfaz en tiempo real
         req.io.to(productId).emit("bidUpdate", {
             productId,
-            currentPrice: bidAmount,
+            currentPrice: updatedProduct.currentPrice,
             topBids: topBids.map((bid) => ({
                 userId: bid.userId,
                 userName: bid.userName,
@@ -87,7 +98,9 @@ router.post("/:productId/bid-j", async (req, res) => {
 
         res.status(200).json({ message: "Puja actualizada con éxito" });
     } catch (error) {
+        // Abortar transacción en caso de error
         if (session.inTransaction()) {
+            console.log("Abortando transacción por error:", error.message);
             await session.abortTransaction();
         }
         session.endSession();
