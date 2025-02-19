@@ -30,7 +30,7 @@ router.post("/:productId/bid-j", async (req, res) => {
         const { userId, bidAmount } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(productId) || bidAmount <= 0) {
-            return res.status(400).json({ message: "Parámetros de entrada inválidos" });
+            throw new Error("Parámetros de entrada inválidos");
         }
 
         const [user, product] = await Promise.all([
@@ -87,11 +87,15 @@ router.post("/:productId/bid-j", async (req, res) => {
 
         res.status(200).json({ message: "Puja actualizada con éxito" });
     } catch (error) {
-        await session.abortTransaction();
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
         session.endSession();
         res.status(400).json({ message: error.message || "Error al crear o actualizar la puja" });
     }
 });
+
+
 
 
 // Obtener las pujas por ID del producto con paginación optimizada
