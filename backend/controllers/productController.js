@@ -26,9 +26,9 @@ export const createProduct = [
     upload.array('images', 5),
     async (req, res) => {
         try {
-            const { name, description, category, type, auctionType, flashDuration, startingPrice, auctionStartTime, auctionEndTime, puja1, puja2, puja3 } = req.body;
+            const { name, description, category, auctionType, flashDuration, startingPrice, auctionStartTime, auctionEndTime, puja1, puja2, puja3 } = req.body;
 
-            if (!name || !description || !category || !type || !puja1 || !puja2 || !puja3) {
+            if (!name || !description || !category || !puja1 || !puja2 || !puja3) {
                 return res.status(400).json({ error: 'Faltan datos obligatorios' });
             }
 
@@ -56,7 +56,6 @@ export const createProduct = [
                 name,
                 description,
                 category,
-                type,
                 auctionType,
                 flashDuration: auctionType === 'flash' ? 60 : undefined, // Solo permite 1 hora para flash
                 images: validImages,
