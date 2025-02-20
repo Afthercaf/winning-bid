@@ -32,7 +32,6 @@ export const createProduct = [
                 return res.status(400).json({ error: 'Faltan datos obligatorios' });
             }
 
-
             // Subir imágenes a Imgur
             const images = await Promise.all(
                 req.files.map(async (file) => {
@@ -52,6 +51,7 @@ export const createProduct = [
                 name,
                 description,
                 category,
+                type: type || 'subasta', // Valor predeterminado "subasta"
                 auctionType,
                 flashDuration: auctionType === 'flash' ? 60 : undefined, // Solo permite 1 hora para flash
                 images: validImages,
