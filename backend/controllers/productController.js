@@ -32,10 +32,6 @@ export const createProduct = [
                 return res.status(400).json({ error: 'Faltan datos obligatorios' });
             }
 
-            const totalPujas = parseInt(puja1) + parseInt(puja2) + parseInt(puja3);
-            if (totalPujas !== 150) {
-                return res.status(400).json({ error: 'Las pujas deben sumar un total de 150.' });
-            }
 
             // Subir imágenes a Imgur
             const images = await Promise.all(
