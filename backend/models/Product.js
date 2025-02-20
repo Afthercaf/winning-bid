@@ -13,7 +13,7 @@ const productSchema = new mongoose.Schema({
     auctionType: { 
         type: String, 
         enum: ['normal', 'flash'], 
-        required: true 
+        required: false
     },
     flashDuration: { 
         type: Number, 
