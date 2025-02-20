@@ -51,7 +51,7 @@ export const createProduct = [
                 name,
                 description,
                 category,
-                type: type || 'subasta', // Valor predeterminado "subasta"
+                type: 'subasta',  // Valor predeterminado "subasta"
                 auctionType,
                 flashDuration: auctionType === 'flash' ? 60 : undefined, // Solo permite 1 hora para flash
                 images: validImages,
