@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
     type: { 
         type: String, 
         enum: ['subasta'], // Solo "subasta"
-        required: true 
+        required: false
     },
     auctionType: { 
         type: String, 
