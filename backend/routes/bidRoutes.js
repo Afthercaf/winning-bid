@@ -14,116 +14,57 @@ const axios = require("axios");
 const { CustomersApi, Configuration, OrdersApi } = require("conekta");
 
 
-// Constantes y configuración
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 100; // Delay entre reintentos
+// Validación de pujas
+const MAX_RETRIES = 3; // Número máximo de reintentos
 
-// Utilitarios
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-const validateBid = async (product, bidAmount, session) => {
-    const currentMaxBid = await Bid.findOne({ auctionId: product._id })
+const validateBid = async (product, bidAmount) => {
+    const currentMaxPrice = await Bid.findOne({ auctionId: product._id })
         .sort({ bidAmount: -1 })
         .select('bidAmount')
-        .session(session)
         .lean();
 
-    const minValidPrice = currentMaxBid ? currentMaxBid.bidAmount : product.startingPrice;
-    const minIncrease = product.minBidIncrement || 1; // Incremento mínimo configurable
-
+    const minValidPrice = currentMaxPrice ? currentMaxPrice.bidAmount : product.startingPrice;
     if (bidAmount <= minValidPrice) {
         throw new Error(`La puja debe ser mayor a $${minValidPrice}`);
     }
-
-    if (bidAmount < minValidPrice + minIncrease) {
-        throw new Error(`El incremento mínimo debe ser $${minIncrease}`);
-    }
-
     return true;
 };
 
 const executeTransaction = async (session, productId, userId, bidAmount, user, product, req) => {
-    // Validaciones adicionales de seguridad
-    if (userId.toString() === product.sellerId?.toString()) {
-        throw new Error("El vendedor no puede pujar en su propia subasta");
-    }
-
-    // Verificar si la subasta está activa
-    const now = new Date();
-    if (product.startTime && product.startTime > now) {
-        throw new Error("La subasta aún no ha comenzado");
-    }
-    if (product.endTime && product.endTime < now) {
-        throw new Error("La subasta ha finalizado");
-    }
-
     // Validar la puja
-    await validateBid(product, bidAmount, session);
+    await validateBid(product, bidAmount);
 
-    // Crear o actualizar la puja con optimistic locking
-    const existingBid = await Bid.findOne({ 
-        auctionId: productId, 
-        userId 
-    }).session(session);
+    // Actualizar o crear la puja
+    const existingBid = await Bid.findOne({ auctionId: productId, userId }).session(session);
 
     if (existingBid) {
-        const result = await Bid.updateOne(
-            { 
-                _id: existingBid._id,
-                bidAmount: { $lt: bidAmount } // Solo actualizar si la nueva puja es mayor
-            },
-            {
-                $set: {
-                    bidAmount: bidAmount,
-                    bidTime: new Date()
-                }
-            },
-            { session }
-        );
-
-        if (result.modifiedCount === 0) {
-            throw new Error("No se pudo actualizar la puja - valor inferior o conflicto");
-        }
+        existingBid.bidAmount = bidAmount;
+        existingBid.bidTime = new Date();
+        await existingBid.save({ session });
     } else {
-        await new Bid({
+        const newBid = new Bid({
             auctionId: productId,
             userId,
             userName: user.name,
             bidAmount,
             bidTime: new Date(),
-        }).save({ session });
+        });
+        await newBid.save({ session });
     }
 
-    // Actualizar el precio actual del producto con verificación
-    const updatedProduct = await Product.findOneAndUpdate(
-        { 
-            _id: productId,
-            currentPrice: { $lt: bidAmount }
-        },
-        {
-            $set: { currentPrice: bidAmount },
-            $inc: { totalBids: 1 }
-        },
-        { 
-            session,
-            new: true,
-            runValidators: true
-        }
-    );
+    // Actualizar el precio actual del producto
+    await Product.findByIdAndUpdate(productId, {
+        currentPrice: bidAmount,
+    }, { session });
 
-    if (!updatedProduct) {
-        throw new Error("No se pudo actualizar el precio del producto - conflicto detectado");
-    }
-
-    // Obtener las pujas más altas de forma eficiente
+    // Obtener las 5 pujas más altas
     const topBids = await Bid.find({ auctionId: productId })
         .sort({ bidAmount: -1 })
         .limit(5)
-        .select('userId userName bidAmount bidTime')
         .session(session)
         .lean();
 
-    // Emitir actualización vía WebSocket
+    // Emitir el evento de WebSocket
     req.io.to(productId).emit('bidUpdate', {
         productId,
         currentPrice: bidAmount,
@@ -133,110 +74,60 @@ const executeTransaction = async (session, productId, userId, bidAmount, user, p
             bidAmount: bid.bidAmount,
             timestamp: bid.bidTime,
         })),
-        totalBids: updatedProduct.totalBids
     });
-
-    return { topBids, updatedProduct };
 };
 
-// Middleware de validación
-const validateRequest = (req, res, next) => {
-    const { userId, bidAmount } = req.body;
-    const { productId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(userId) ||
-        !mongoose.Types.ObjectId.isValid(productId)) {
-        return res.status(400).json({ message: "IDs inválidos" });
-    }
-
-    if (!bidAmount || typeof bidAmount !== 'number' || bidAmount <= 0) {
-        return res.status(400).json({ message: "Monto de puja inválido" });
-    }
-
-    next();
-};
-
-// Manejador principal de pujas
-router.post("/:productId/bid-j", validateRequest, async (req, res) => {
+router.post("/:productId/bid-j", async (req, res) => {
     let retryCount = 0;
-    const { productId } = req.params;
-    const { userId, bidAmount } = req.body;
-
     while (retryCount < MAX_RETRIES) {
         const session = await mongoose.startSession();
         session.startTransaction();
 
         try {
-            // Buscar usuario y producto con timeout
+            const { productId } = req.params;
+            const { userId, bidAmount } = req.body;
+
+            // Validar los parámetros de entrada
+            if (!mongoose.Types.ObjectId.isValid(userId) ||
+                !mongoose.Types.ObjectId.isValid(productId) ||
+                bidAmount <= 0) {
+                throw new Error("Parámetros de entrada inválidos");
+            }
+
+            // Buscar el usuario y el producto en paralelo
             const [user, product] = await Promise.all([
                 User.findById(userId).session(session).lean(),
-                Product.findById(productId).session(session).lean()
+                Product.findById(productId).session(session).lean(),
             ]);
 
-            // Validaciones básicas
-            if (!user) {
-                throw new Error("Usuario no encontrado");
-            }
-            if (!product || product.type !== "subasta") {
-                throw new Error("Producto no válido o no es una subasta");
+            if (!user) throw new Error("Usuario no encontrado");
+            if (!product || product.type !== "subasta") throw new Error("Producto no válido");
+
+            if (product.endTime && product.endTime < new Date()) {
+                throw new Error("La subasta ha finalizado");
             }
 
-            // Ejecutar la transacción principal
-            const result = await executeTransaction(
-                session, 
-                productId, 
-                userId, 
-                bidAmount, 
-                user, 
-                product, 
-                req
-            );
+            // Ejecutar la transacción
+            await executeTransaction(session, productId, userId, bidAmount, user, product, req);
 
             await session.commitTransaction();
             session.endSession();
-
-            return res.status(200).json({
-                message: "Puja procesada con éxito",
-                currentPrice: bidAmount,
-                topBids: result.topBids,
-                totalBids: result.updatedProduct.totalBids
-            });
-
+            return res.status(200).json({ message: "Puja actualizada con éxito" });
         } catch (error) {
             await session.abortTransaction();
             session.endSession();
 
-            const isWriteConflict = error.message.includes("Write conflict");
-            
-            if (isWriteConflict && retryCount < MAX_RETRIES - 1) {
+            if (error.message.includes("Write conflict") && retryCount < MAX_RETRIES - 1) {
                 retryCount++;
-                console.warn(`Conflicto de escritura detectado. Reintento ${retryCount + 1}/${MAX_RETRIES}`);
-                await sleep(RETRY_DELAY_MS * Math.pow(2, retryCount)); // Backoff exponencial
-                continue;
+                console.warn(`Write conflict detected. Retrying attempt ${retryCount + 1}...`);
+            } else {
+                return res.status(400).json({ message: error.message || "Error al crear o actualizar la puja" });
             }
-
-            // Log detallado del error para debugging
-            console.error('Error en proceso de puja:', {
-                error: error.message,
-                productId,
-                userId,
-                bidAmount,
-                retryCount,
-                timestamp: new Date()
-            });
-
-            return res.status(400).json({
-                message: isWriteConflict 
-                    ? "Sistema ocupado, por favor intente nuevamente"
-                    : error.message || "Error al procesar la puja"
-            });
         }
     }
-
-    return res.status(429).json({
-        message: "Demasiados intentos fallidos, por favor intente más tarde"
-    });
 });
+  
+
 
 
 // Obtener las pujas por ID del producto con paginación optimizada
