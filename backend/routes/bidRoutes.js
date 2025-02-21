@@ -157,7 +157,7 @@ const validateRequest = (req, res, next) => {
 };
 
 // Manejador principal de pujas
-router.post("/:productId/bid", validateRequest, async (req, res) => {
+router.post("/:productId/bid-j", validateRequest, async (req, res) => {
     let retryCount = 0;
     const { productId } = req.params;
     const { userId, bidAmount } = req.body;
