@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); 
 
 // Definir el esquema de usuario
 const userSchema = new mongoose.Schema({
@@ -45,6 +45,17 @@ const userSchema = new mongoose.Schema({
     playerId: {
         type: String,
     },
+    paymentInfo: { // Nueva sección para almacenar información de pago
+        cardToken: { type: String }, // Token de la tarjeta (generado con Conekta.js)
+        bankAccount: { // Información de cuenta bancaria (opcional)
+            accountNumber: { type: String },
+            bankName: { type: String },
+        },
+    },
+    bidPercentages: { // Agregar campo con valores por defecto
+        type: [Number],
+        default: [10, 15, 20],
+    },
 });
 
 // Crear el modelo de usuario usando el esquema definido
@@ -52,3 +63,4 @@ const User = mongoose.model('User', userSchema);
 
 // Exportar el modelo
 module.exports = User;
+
