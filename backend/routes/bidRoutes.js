@@ -44,11 +44,9 @@ router.post("/:productId/bid-j", async (req, res) => {
             throw new Error("Parámetros de entrada inválidos");
         }
 
-        // Buscar el usuario y el producto en paralelo
-        const [user, product] = await Promise.all([
-            User.findById(userId).session(session).lean(),
-            Product.findById(productId).session(session).lean(),
-        ]);
+      // Buscar el usuario y el producto
+      const user = await User.findById(userId).session(session);
+      const product = await Product.findById(productId).session(session);
 
         if (!user) throw new Error("Usuario no encontrado");
         if (!product || product.type !== "subasta") throw new Error("Producto no válido");
@@ -87,8 +85,7 @@ router.post("/:productId/bid-j", async (req, res) => {
         const topBids = await Bid.find({ auctionId: productId })
             .sort({ bidAmount: -1 })
             .limit(5)
-            .session(session)
-            .lean();
+        .session(session);
 
         // Emitir el evento de WebSocket
         req.io.to(productId).emit('bidUpdate', {
