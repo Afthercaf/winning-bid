@@ -1,24 +1,25 @@
 // src/pages/Home.jsx
 import React from 'react';
-import Banner from '../components/home/BannerCarousel';
-import DailyDeals from '../components/home/DailyDeals';
-import Recommendations from '../components/home/Recommendations';
+import FlasAuction from '../components/home/FlashAuctions';
+import Footer from '../components/footer/Footer';
 import CategoriesSection from '../components/home/CategoriesSection';
-import LocalMarketsCarousel from '../components/home/LocalMarketsCarousel';
 import './Home.css';
 import Navbar from '../components/navbar/navbarComponent';
-import Footer from '../components/footer/Footer';
+import Principal from '../components/home/viewfirst';
+
 
 const Home = () => {
     return (
         <div className="home-page">
             <Navbar></Navbar>
-            <Banner />
-            <DailyDeals />
+            <Principal></Principal>
             <CategoriesSection />
-            <Recommendations />
-            <LocalMarketsCarousel />
+            
+            <FlasAuction />
+
             <Footer></Footer>
+        
+        
         </div>
     );
 };

@@ -1,0 +1,108 @@
+.principal-container {
+    position: relative;
+    height: 700px;
+    width: 100%;
+    overflow: hidden;
+    top: 10px;
+  }
+  
+  .principal-container::before {
+    content: "";
+    position: absolute;
+    top: 77px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: linear-gradient(to left, rgba(0, 0, 0, 0), rgba(0, 0, 0, .9)),
+      url(https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-w77PKiG0ddXPqeR8w6d9Zqd1ahBhyE.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  
+  .principal-contenido {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .principal-titulo {
+    color: white;
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    max-width: 600px;
+  }
+  
+  .principal-descripcion {
+    color: rgb(229, 229, 229);
+    font-size: 20px;
+    margin-bottom: 32px;
+    max-width: 600px;
+  }
+  
+  .principal-boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #003B68, #003d99);
+    border: none;
+    color: white;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 8px 1px;
+    border-radius: 50px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.25), inset 0px -3px 6px rgba(255, 255, 255, 0.3);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 120px;
+  }
+  
+  .principal-boton:hover {
+    background: linear-gradient(145deg, #005bb5, #003380);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.35), inset 0px -2px 4px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .principal-boton:active {
+    transform: translateY(1px);
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2), inset 0px 3px 6px rgba(255, 255, 255, 0.1);
+  }
+  
+  .principal-boton:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(126, 211, 33, 0.5);
+  }
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .principal-titulo {
+      font-size: 36px;
+    }
+  
+    .principal-descripcion {
+      font-size: 18px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .principal-titulo {
+      font-size: 28px;
+    }
+  
+    .principal-descripcion {
+      font-size: 16px;
+    }
+  
+    .principal-contenido {
+      padding: 0 16px;
+    }
+  }
+  
+  

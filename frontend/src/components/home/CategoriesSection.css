@@ -1,53 +1,63 @@
 .categories-section {
-    padding: 20px;
+    padding: 0; /* Eliminamos padding para que el título esté pegado al borde */
     text-align: center;
-    background-color: #f5f5f5bc; /* Fondo gris claro */
-    border-radius: 10px;
+    background-color: #ffffff;
+ 
+    overflow: hidden; /* Para que el título azul no sobresalga */
+    margin-top: 20px;
 }
-
 .categories-title {
-    color: #333333; /* Color del título en gris oscuro */
-    font-size: 2rem;
-    margin-bottom: 20px;
+    background-color: #003366; /* Azul oscuro */
+    color: white;
+    font-size: 1.5rem;
     font-weight: bold;
+    text-align: left; /* Alineado a la izquierda */
+    padding: 15px 20px; /* Espaciado interno */
+    margin: 0; /* Sin margen extra */
+    width: 100%; /* Asegura que cubra todo el ancho */
 }
-
 .categories-grid {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     gap: 20px;
     flex-wrap: wrap;
+    padding: 20px; /* Añadimos padding solo aquí para que no afecte el título */
 }
-
 .category-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 20px;
-    width: 150px;
-    height: 150px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .category-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.category-icon {
-    font-size: 2.5rem;
-    color: #7ED321; /* Verde suave */
-    margin-bottom: 10px;
+.category-image {
+    width: 200px;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.category-overlay {
+    width: 100%;
+    background-color: rgba(0, 47, 94, 0.7); /* Azul oscuro con transparencia */
+    padding: 10px;
+    text-align: center;
+    border-radius: 0 0 10px 10px;
 }
 
 .category-name {
     font-size: 1rem;
-    color: #333333;
-    font-weight: 500;
-    text-align: center;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
 }

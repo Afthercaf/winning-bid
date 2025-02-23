@@ -1,0 +1,52 @@
+.login-navbar {
+    background-color: #0a3d62;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+  }
+  
+  .login-navbar-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .login-navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .login-navbar-link {
+    color: #fff;
+    text-decoration: none;
+    margin-right: 1.5rem;
+    font-size: 1rem;
+    transition: color 0.3s;
+  }
+  
+  .login-navbar-link:hover {
+    color: #dcdde1;
+  }
+  
+  .login-navbar-button {
+    background-color: #0a3d62;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .login-navbar-button.active {
+    background-color: #fff;
+    color: #0a3d62;
+  }
+  
+  .login-navbar-button:hover {
+    background-color: #fff;
+    color: #0a3d62;
+  }
+  

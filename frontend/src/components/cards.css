@@ -1,0 +1,197 @@
+/* Sección de productos */
+.product-section {
+    flex: 1;
+    padding: 20px;
+    text-align: center;
+    margin-left: 250px;
+    margin-top: 20px;
+}
+
+/* Contenedor de las tarjetas */
+.auction-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 30px;
+    justify-content: center;
+    max-width: 1000px;
+    margin: 10px auto;
+    padding: 20px;
+    
+}
+
+/* Tarjeta individual */
+.auction-card {
+    background-color: white;
+    border-radius: 15px;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 220px;
+
+}
+
+.auction-card:hover {
+    transform: translateY(-3px);
+    background-color: rgb(255, 255, 255);
+}
+
+/* Timer en la parte superior */
+.product-timer {
+    background: #004b7c;
+    color: rgb(255, 255, 255);
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 6px;
+    text-align: center;
+    width: 100%;
+}
+
+/* Imagen del producto */
+.product-image-container {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 3px solid #10456d;
+    background: white;
+}
+
+.product-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Detalles del producto */
+.product-details {
+    background: white;
+    padding: 7px;
+    
+}
+
+
+
+/* Nombre del producto */
+.product-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-align: center;
+    color: #004b7c;
+    width: 100%;
+}
+
+/* Precio */
+.product-price {
+    font-size: 1rem;
+    font-weight: normal;
+    margin-bottom: 12px;
+    color: #004b7c;
+    text-align: center;
+    width: 100%;
+}
+
+/* Input de puja */
+.bid-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+    width: 100%;
+    gap: 8px;
+}
+
+.bid-input {
+    width: 60%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #004b7c;
+    font-size: 1rem;
+    text-align: left;
+}
+
+.bid-button {
+    background: #004b7c;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: bold;
+    width: 35%;
+}
+
+.bid-button:hover {
+    background: #002f4b;
+}
+
+/* Botón de detalles */
+.details-button {
+    background: #004b7c;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.details-button:hover {
+    background: #002f4b;
+}
+
+.auction-card h3 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #14213d;
+}
+
+/* Contenedor de paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+/* Botones de paginación */
+.pagination-button {
+    background: #004b7c;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.pagination-button:hover {
+    background: #002f4b;
+}
+
+.pagination-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Texto de paginación */
+.pagination-info {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #004b7c;
+}

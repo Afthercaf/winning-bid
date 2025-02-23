@@ -1,0 +1,30 @@
+import React, { useState } from 'react';
+import "./pruebacrear.css"
+import BackButton from '../components/prubacrear/botton';
+import ImageUploader from '../components/prubacrear/imagen';
+import ProductForm from '../components/prubacrear/formulario';
+
+const CreateProt = () => {
+  const [product, setProduct] = useState({
+    name: '',
+    description: '',
+    category: '',
+    images: [],
+    auctionType: 'normal',
+    startingPrice: '',
+    auctionStartTime: '',
+    puja1: '',
+    puja2: '',
+    puja3: ''
+  });
+
+  return (
+    <div className="create-product-container">
+      <BackButton />
+      <ImageUploader product={product} setProduct={setProduct} />
+      <ProductForm product={product} setProduct={setProduct} />
+    </div>
+  );
+};
+
+export default CreateProt;

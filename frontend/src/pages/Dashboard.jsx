@@ -4,6 +4,7 @@ import { FaDollarSign, FaBox, FaUser } from 'react-icons/fa';
 import './Dashboard.css';
 import api from '../../api'; // Importar `api` en lugar de `axios`
 import SalesChart from '../components/SalesChart/SalesChart';
+import Navbar from '../components/navbar/navbarComponent';
 
 const Dashboard = () => {
   const [ganancias, setGanancias] = useState(0);
@@ -73,6 +74,7 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
+      <Navbar></Navbar>
       <Sidebar />
       <div className="dashboard-content">
         <h1 className="dashboard-title">Dashboard</h1>

@@ -17,7 +17,7 @@ const ProtectedRoute = ({ component: Component }) => {
   }
 
   // Si está autenticado pero no es admin, redirigir a /
-  if (isAuthenticated && userRole !== 'admin') {
+  if (isAuthenticated && userRole !== 'cliente') {
     return <Navigate to="/" replace />;
   }
 

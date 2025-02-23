@@ -2,6 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import './UserProfile.css';
 import { FaArrowLeft } from 'react-icons/fa';
+import Navbar from '../components/navbar/navbarComponent';
+import Sidebar from '../components/sidebar/Sidebar';
 
 const UserProfile = () => {
   const { userRole, logout, userId, updateUserAvatar, userName } = useContext(AuthContext);
@@ -12,10 +14,10 @@ const UserProfile = () => {
     if (userId) {
       const fetchAvatar = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/api/users/${userId}/avatar`, { credentials: 'include' });
+          const response = await fetch(`https://winning-bid.onrender.com/api/users/${userId}/avatar`, { credentials: 'include' });
           const data = await response.json();
           if (data.avatar) {
-            setAvatar(`http://localhost:5000/${data.avatar}`);
+            setAvatar(`https://winning-bid.onrender.com/${data.avatar}`);
           }
         } catch (error) {
           console.error('Error al obtener el avatar:', error);
@@ -49,14 +51,14 @@ const UserProfile = () => {
       formData.append('avatar', selectedFile);
 
       try {
-        const response = await fetch(`http://localhost:5000/api/users/${userId}/avatar`, {
+        const response = await fetch(`https://winning-bid.onrender.com/api/users/${userId}/avatar`, {
           method: 'PUT',
           body: formData,
           credentials: 'include',
         });
         const data = await response.json();
         if (data.user && data.user.avatar) {
-          const newAvatar = `http://localhost:5000/${data.user.avatar}`;
+          const newAvatar = `https://winning-bid.onrender.com/${data.user.avatar}`;
           setAvatar(newAvatar);
           updateUserAvatar(newAvatar); // Actualiza el avatar en AuthContext
         }
@@ -70,6 +72,8 @@ const UserProfile = () => {
 
   return (
     <div className="user-profile-container">
+      <Navbar></Navbar>
+      <Sidebar></Sidebar>
       <div className="back-button" onClick={() => (window.location.href = '/')}>
         <FaArrowLeft /> Volver a Home
       </div>

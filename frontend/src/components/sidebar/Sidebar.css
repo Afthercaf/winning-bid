@@ -1,94 +1,80 @@
-.sidebar {
-    width: 250px;
-    height: 100;
-    background-color: #1a2238;
-    color: white;
-    padding: 20px;
-  }
-  
-  .sidebar-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .logo {
-    width: 30px;
-    margin-right: 10px;
-  }
-  
-  .brand-name {
-    font-size: 20px;
-    font-weight: bold;
-  }
-  
-  .sidebar-menu {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .sidebar-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    color: white;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .sidebar-item::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 4px;
-    background-color: #007bff;
-    transform: scaleY(0);
-    transition: transform 0.3s ease;
-  }
-  
-  .sidebar-item:hover::before {
-    transform: scaleY(1);
-  }
-  
-  .sidebar-item:hover {
-    background-color: #29304d;
-    transform: translateX(10px);
-  }
-  
-  .sidebar-icon {
-    margin-right: 10px;
-    font-size: 20px;
-  }
+.sidebarE {
+  position: fixed;
+  width: 78px;
+  height: 90vh;
+  left: 0;
+  top: 70PX;
+  background: #E1E8FA;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  padding: 20px 0;
+}
 
-  .sidebar-logo {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .logo-image {
-    width: 40px; /* Ajusta el tamaño de la imagen según tu preferencia */
-    height: 40px;
-    margin-right: 10px;
-  }
-  
-  .logo-text {
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: bold;
-  }
-  
-  .sidebar-link {
-    color: white;
-    text-decoration: none;
-  }
-  
-  .sidebar-link:hover {
-    color: #ff0000; /* Cambia este color para el hover si deseas un tono diferente */
-  }
-  
+/* Icons general styles */
+.sidebarE a, 
+.sidebarE button {
+  width: 100%;
+  padding: 15px 0;
+  color: #003B68;
+  text-decoration: none;
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.sidebarE a:hover,
+.sidebarE button:hover {
+  color: #55A2CE;
+}
+
+/* Main content area with flex-grow */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100%;
+  gap: 10px;
+}
+
+/* Top icons group */
+.top-icons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Bottom icons group */
+.bottom-icons {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Divider line */
+.dividerE {
+  width: 30px;
+  height: 1px;
+  background: #003B68;
+  opacity: 0.3;
+  margin: 5px 0;
+}
+
+/* Specific positioning for user and logout */
+.sidebar-link-profilE,
+.sidebar-button-logoutE {
+  margin-top: auto;
+}
+
+.sidebar-button-logoutE {
+  margin-bottom: 20px;
+}

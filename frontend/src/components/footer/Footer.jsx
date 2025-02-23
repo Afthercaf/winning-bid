@@ -1,64 +1,73 @@
 import React from 'react';
 import './Footer.css';
-import logo from '../../assets/logo.png'; // Asegúrate de tener la ruta correcta de tu logo
+
+import logo from '../../assets/winningbid_lopgp-removebg-preview.png';
+import { FaFacebook, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 
 const Footer = () => {
   return (
     <footer className="footer">
-      {/* Sección de logo */}
-      <div className="footer-logo-container">
-        <img src={logo} alt="Logo" className="footer-logo" />
+      <div className="footer-container">
+        
+        {/* 1️⃣ Logo e Introducción */}
+        <div className="footer-section">
+          <img src={logo} alt="WinningBid Logo" className="footer-logo" />
+          <div className="footer-social">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"><FaFacebook /></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
+          </div>
+        </div>
+
+        {/* 2️⃣ Sobre la Empresa */}
+        <div className="footer-section">
+          <h4>Empresa</h4>
+          <p><a href="/about">Sobre nosotros</a></p>
+          <p><a href="/services">Nuestros servicios</a></p>
+        </div>
+
+        {/* 3️⃣ Clientes y Soporte */}
+        <div className="footer-section">
+          <h4>Clientes</h4>
+          <p><a href="/support">Soporte al cliente</a></p>
+          <p><a href="/news">Cómo funciona?</a></p>
+          <p><a href="/pricing">Por qué subastar?</a></p>
+        </div>
+
+        {/* 4️⃣ Información de Contacto */}
+        <div className="footer-section">
+          <h4>Contacto</h4>
+          <p><FaEnvelope /> contacto@winningbid.com</p>
+          <p><FaPhone /> +123 456 7890</p>
+          <p><FaMapMarkerAlt /> Calle 123, Ciudad, País</p>
+        </div>
+
       </div>
 
-      {/* Sección de Modelo de Negocios */}
-      <div className="footer-sections">
-        <div className="footer-column">
-          <h4 className="footer-title">Vendedores</h4>
-          <p>
-            Publican productos para subasta o venta directa, alcanzando una audiencia amplia de compradores.
-            La plataforma ofrece herramientas simples y eficientes para gestionar inventarios, fijar precios
-            competitivos y promover ventas rápidas.
-          </p>
-        </div>
-        <div className="footer-column">
-          <h4 className="footer-title">Compradores</h4>
-          <p>
-            Acceden a productos variados con precios competitivos y la opción de comprar en subasta o venta directa.
-            Los compradores disfrutan de un entorno seguro y transparente, con funciones diseñadas para maximizar su experiencia de compra.
-          </p>
-        </div>
-        <div className="footer-column">
-          <h4 className="footer-title">Objetivos</h4>
-          <p>
-            Crear una plataforma donde los usuarios puedan vender y comprar productos de manera fácil, segura y accesible.
-            Nuestro propósito es promover una comunidad conectada por la confianza y la innovación.
-          </p>
-        </div>
-      </div>
-
-      {/* Línea de separación entre secciones */}
-      <div className="footer-divider"></div>
-
-      {/* Market App y contacto */}
-      <div className="footer-contact">
-        <div>
-          <p>
-            <a href="quienes-somos">¿Quiénes somos?</a> | <a href="como-funciona">Cómo funciona</a> | <a href="politicadeprivacidad">Política de privacidad</a> |{' '}
-            <a href="terminosycondiciones">Términos y condiciones</a>
-          </p>
-        </div>
-        <div className="footer-contact-details">
-          <p>Contáctanos: MarketApp@gmail.com</p>
-          <p>Redes sociales: Facebook | Instagram</p> 
-        </div>
-      </div>
-
-      {/* Línea de separación final */}
+      {/* Pie de Página */}
       <div className="footer-bottom">
-        <p>©2024 MarketApp - Apoyando a la segunda mano</p>
+        <p>© 2024 WinningBid - Todos los derechos reservados</p>
+        <div className="footer-links">
+          <a href="/privacy">Política de privacidad</a>
+          <a href="/legal">Aviso legal</a>
+          <a href="/terms">Términos de servicio</a>
+        </div>
       </div>
     </footer>
   );
 };
 
 export default Footer;
+
+
+
+
+
+
+
+
+
+
+
+
+

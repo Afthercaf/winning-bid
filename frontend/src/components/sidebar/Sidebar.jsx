@@ -1,65 +1,56 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaHome, FaEnvelope, FaUsers, FaBoxOpen, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
-import './Sidebar.css';
-import miLogo from '../../assets/logo.png'; // Asegúrate de que la ruta sea correcta
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { faHome, faUser, faHistory, faGripHorizontal, faPlusCircle, faSignOutAlt, faCrown } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import "./Sidebar.css";
 
-const Sidebar = () => {
+const Sidebar = (userId = userId) => {
   const navigate = useNavigate();
 
+
   const handleLogout = () => {
-    // Aquí puedes limpiar cualquier dato del usuario almacenado en el estado o localStorage
-    // Ejemplo: localStorage.removeItem('token');
     alert('Cerrando sesión...');
-    navigate('/login'); // Redirecciona al usuario a la página de inicio de sesión
+    navigate('/login');
   };
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-logo">
-        <img src={miLogo} alt="Logo" className="logo-image" />
-        <span className="logo-text">MarketApp</span>
-      </div>
-      <ul className="sidebar-menu">
-        <li className="sidebar-item">
-          <Link to="/Dashboard" className="sidebar-link">
-            <FaHome className="sidebar-icon" />
-            <span>Dashboard</span>
-          </Link>
-        </li>
-        <li className="sidebar-item">
-          <Link to="/Pedidos" className="sidebar-link">
-            <FaEnvelope className="sidebar-icon" />
-            <span>Pedidos</span>
-          </Link>
-        </li>
-        <li className="sidebar-item">
-          <Link to="/Clientes" className="sidebar-link">
-            <FaUsers className="sidebar-icon" />
-            <span>Clientes</span>
-          </Link>
-        </li>
-        <li className="sidebar-item">
-          <Link to="/Productos" className="sidebar-link">
-            <FaBoxOpen className="sidebar-icon" />
-            <span>Productos</span>
-          </Link>
-        </li>
-        <li className="sidebar-item">
-          <Link to="/" className="sidebar-link">
-            <FaSignInAlt className="sidebar-icon" />
-            <span>Regresar al Home</span>
-          </Link>
-        </li>
-        <li className="sidebar-item">
-          <Link to="/logout" className="sidebar-link" onClick={handleLogout}>
-            <FaUserPlus className="sidebar-icon" />
-            <span>Cerrar Sesión</span>
-          </Link>
-        </li>
-      </ul>
-    </aside>
+    <aside className="sidebarE">
+  <div className="sidebar-content">
+    <div className="top-icons">
+      <Link to="/Dashboard" className="sidebar-link-homE">
+        <FontAwesomeIcon icon={faHome} />
+      </Link>
+      <div className="dividerE"></div>
+      <Link to={`/user-bids/${userId}`} className="sidebar-link-historyE">
+        <FontAwesomeIcon icon={faHistory} />
+      </Link>
+      <div className="dividerE"></div>
+      <Link to="/missubastas" className="sidebar-link-categoriesE">
+        <FontAwesomeIcon icon={faGripHorizontal} />
+      </Link>
+      <div className="dividerE"></div>
+      <Link to="/createproducts" className="sidebar-link-addE">
+        <FontAwesomeIcon icon={faPlusCircle} />
+      </Link>
+      <div className="dividerE"></div>
+      <Link to="/premium" className="sidebar-link-premiumE">
+        <FontAwesomeIcon icon={faCrown} />
+      </Link>
+    </div>
+    
+    <div className="bottom-icons">
+      <div className="dividerE"></div>
+      <Link to="/Account" className="sidebar-link-profilE">
+        <FontAwesomeIcon icon={faUser} />
+      </Link>
+      <div className="dividerE"></div>
+      <button onClick={handleLogout} className="sidebar-button-logoutE">
+        <FontAwesomeIcon icon={faSignOutAlt} />
+      </button>
+    </div>
+  </div>
+</aside>
   );
-};
+}
 
 export default Sidebar;

@@ -1,0 +1,48 @@
+.sidebar {
+    width: 250px;
+    background: #ffffff;
+    padding: 20px;
+    border-right: 2px solid #ddd;
+    min-height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 60px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+    box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h3 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+    text-transform: uppercase; /* 🔵 Azul oscuro */
+  border-bottom: 2px solid hsl(203, 83%, 25%);; 
+    padding-bottom: 8px;
+}
+
+.filter-button, .category-button {
+    display: block;
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 1rem;
+    text-align: left;
+    padding: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s, color 0.3s;
+    border-radius: 5px;
+}
+
+.filter-button:hover, .category-button:hover {
+    background: hsl(203, 83%, 25%);;
+    color: #fff;
+}
+
+.filter-button.active, .category-button.active {
+    background: hsl(203, 83%, 25%);;
+    color: #fff;
+    font-weight: bold;
+}

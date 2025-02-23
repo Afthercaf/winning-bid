@@ -25,14 +25,38 @@ import HowItWorks from './pages/funciones';
 import TermsAndConditions from './pages/politica';
 import PrivacyPolicy from './pages/poli';
 import UserWinning from './pages/winninguser';
+import MainPage from './pages/winnerpage';
+import LoserPage from "./pages/LoserPage";
+import Existo from './pages/AdminD/Pageprub';
+import Footer from './components/footer/Footer';
+import MyProducts from './pages/AdminD/Missubastas';
+import UserBids from './pages/AdminD/Mispujas';
+
+
 
 
 const App = () => {
+ 
   return (
     <AuthProvider>
       <UserProductsProvider>
         <Router>
           <Routes>
+
+
+          
+           <Route path="/missubastas" element={<MyProducts/>} />
+           
+            <Route path="/prueba" element={<Existo/>} />
+            {/*  <Route path="/user-bids" element={<ProtectedRoute component={Mispujas} />} />*/}
+
+
+
+
+            <Route path="/user-bids/:userId" element={<UserBids />} />
+
+
+
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/products" element={<Products />} />
@@ -50,6 +74,8 @@ const App = () => {
             <Route path="/como-funciona" element={< HowItWorks/>} />
             <Route path="/politicadeprivacidad" element={<PrivacyPolicy/>} />
             <Route path="/terminosycondiciones" element={<TermsAndConditions />} />
+
+            
             
             {/* Ruta para historial de compras y detalles de compra */}
             <Route path="/Historial" element={<Compras />} />
@@ -60,14 +86,21 @@ const App = () => {
 
 
             {/* Rutas protegidas */}
-            <Route path="/Dashboard" element={<ProtectedRoute component={Dashboard} />} />
+            <Route path="/Dashboard" element={<Dashboard />} />
             <Route path="/Pedidos" element={<ProtectedRoute component={Pedidos} />} />
             <Route path="/Clientes" element={<ProtectedRoute component={Clientes} />} />
             <Route path="/Productos" element={<ProtectedRoute component={Productos} />} />
+            
+
+                <Route path="/winner/:orderId" element={<MainPage />} />
+                <Route path="/loser/:productId" element={<LoserPage />} />
           </Routes>
+          
         </Router>
       </UserProductsProvider>
+     
     </AuthProvider>
+    
   );
 };
  

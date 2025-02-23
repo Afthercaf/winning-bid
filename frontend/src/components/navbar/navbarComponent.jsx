@@ -1,10 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import './navbarComponent.css';
 import { FaBell, FaStore } from 'react-icons/fa';
-import { AiOutlineHeart } from 'react-icons/ai';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../../api';
-import logo from '../../assets/logo.png'; // Import the logo image
 
 const Navbar = () => {
   const { isAuthenticated, userRole, userId, logout } = useContext(AuthContext);
@@ -14,7 +12,7 @@ const Navbar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isVendedorMode, setIsVendedorMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // Estado de carga
-  const [avatar, setAvatar] = useState('/uploads/avatar-default.webp');
+  const [avatar, setAvatar] = useState('../../../../backend/uploads/avatar-default.webp');
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -33,7 +31,7 @@ const Navbar = () => {
     const fetchAvatar = async () => {
       try {
         if (userId) {
-          const response = await fetch(`http://localhost:5000/api/users/${userId}/avatar`, {
+          const response = await fetch(`https://winning-bid.onrender.com/api/users/${userId}/avatar`, {
             credentials: 'include',
           });
           const data = await response.json();
@@ -46,9 +44,9 @@ const Navbar = () => {
       }
     };
 
-    fetchNotifications();
+    if (isAuthenticated) fetchNotifications();
     fetchAvatar();
-  }, [userId]);
+  }, [userId, isAuthenticated]);
 
   const handleNotificationsClick = async () => {
     setNotificationMenuOpen(!notificationMenuOpen);
@@ -89,10 +87,10 @@ const Navbar = () => {
 
       <div className="navbar-container">
         <nav className="navbar">
-          {/* Logo on the left */}
+          {/* Texto en lugar de logo */}
           <div className="logo-container">
-            <a href="/">
-              <img src={logo} alt="Logo" className="navbar-logo" />
+            <a href="/" style={{ color: '#FFFFFF', textDecoration: 'none', fontSize: '1rem', fontWeight: 'bold', }}>
+              Winning Bid
             </a>
           </div>
 
@@ -101,15 +99,16 @@ const Navbar = () => {
             {isVendedorMode ? (
               <>
                 <li><a href="/products" data-original-text="Mis Productos">Mis Productos</a></li>
-                <li><a href="/ventas" data-original-text="Ventas">Ventas</a></li>
+                <li><a href="/Dashboard" data-original-text="Ventas">Dashboard</a></li>
+                
               </>
             ) : (
               <>
-                <li><a href="/allderrapin" data-original-text="Productos">Productos</a></li>
-                {userRole === 'admin' ? (
+                <li><a href="/allderrapin" data-original-text="Subastas activas">Subastas activas</a></li>
+                {userRole === 'user' ? (
                   <li><a href="/Dashboard" data-original-text="Dashboard">Dashboard</a></li>
                 ) : (
-                  <li><a href="/Historial" data-original-text="Historial">Historial</a></li>
+                  <li><a href="/about" data-original-text="Acerca de nosotros">Acerca de nosotros</a></li>
                 )}
               </>
             )}
@@ -121,44 +120,41 @@ const Navbar = () => {
             <>
               {!isVendedorMode && (
                 <>
-                  <div className="notification-icon" onClick={handleNotificationsClick}>
-                    <FaBell />
-                    {unreadCount > 0 && <span className="notification-count">{unreadCount}</span>}
-                    
-                    {notificationMenuOpen && (
-                      <div className="notification-dropdown">
-                        <div className="notification-header">
-                          <h4>Notificaciones</h4>
-                          <span className="notification-clear" onClick={() => setNotifications([])}>Limpiar</span>
+                  {isAuthenticated && (
+                    <div className="notification-icon" onClick={handleNotificationsClick}>
+                      <FaBell />
+                      {unreadCount > 0 && <span className="notification-count">{unreadCount}</span>}
+                      
+                      {notificationMenuOpen && (
+                        <div className="notification-dropdown">
+                          <div className="notification-header">
+                            <h4>Notificaciones</h4>
+                            <span className="notification-clear" onClick={() => setNotifications([])}>Limpiar</span>
+                          </div>
+                          <div className="notification-content">
+                            {notifications.length > 0 ? (
+                              notifications.map((notification, index) => (
+                                <div
+                                  key={index}
+                                  className={`notification-item ${notification.read ? '' : 'unread'}`}
+                                >
+                                  {notification.message}
+                                  <span className="notification-time">
+                                    {new Date(notification.created_at).toLocaleTimeString()}
+                                  </span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="no-notifications">No tienes notificaciones</div>
+                            )}
+                          </div>
                         </div>
-                        <div className="notification-content">
-                          {notifications.length > 0 ? (
-                            notifications.map((notification, index) => (
-                              <div
-                                key={index}
-                                className={`notification-item ${notification.read ? '' : 'unread'}`}
-                              >
-                                {notification.message}
-                                <span className="notification-time">
-                                  {new Date(notification.created_at).toLocaleTimeString()}
-                                </span>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="no-notifications">No tienes notificaciones</div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="heart-icon">
-                    <AiOutlineHeart />
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
-              <button className="sell-button" onClick={toggleVendedorMode}>
-                <FaStore className="sell-icon" /> {isVendedorMode ? "Comprar" : "Vender"}
-              </button>
+            
             </>
           )}
     
@@ -172,9 +168,9 @@ const Navbar = () => {
               />
               {accountMenuOpen && (
                 <div className="dropdown-menu">
-                  <a href="/Account">Account</a>
-                  <a href="/settings">Settings</a>
-                  <a href="#" onClick={logout}>Log Out</a>
+                  <a href="/Account">Tu Cuenta</a>
+                  <a href="/Dashboard">Panel De Control</a>
+                  <a href="#" onClick={logout}>Cerrar Sesión</a>
                 </div>
               )}
             </div>
