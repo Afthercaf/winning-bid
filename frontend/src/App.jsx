@@ -25,7 +25,7 @@ import HowItWorks from "./pages/funciones";
 import TermsAndConditions from "./pages/politica";
 import PrivacyPolicy from "./pages/poli";
 import UserWinning from "./pages/winninguser";
-import WinnerPage from "./pages/WinnerPage";
+import WinnerPage from "./pages/Winnerpage.jsx";
 import LoserPage from "./pages/LoserPage";
 import Existo from "./pages/AdminD/Pageprub";
 import Footer from "./components/footer/Footer";

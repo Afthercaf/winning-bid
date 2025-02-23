@@ -3,7 +3,7 @@
 import React from 'react';
 import Winner from '../components/winnerpa';
 
-const MainPage = () => {
+const WinnerPage = () => {
   
 
   return (
@@ -14,4 +14,4 @@ const MainPage = () => {
   );
 };
 
-export default MainPage;
+export default WinnerPage;
