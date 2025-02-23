@@ -28,7 +28,7 @@ import UserWinning from "./pages/winninguser";
 import WinnerPage from "./pages/Winnerpage";
 import LoserPage from "./pages/LoserPage";
 import Existo from "./pages/AdminD/Pageprub";
-import Footer from "./components/footer/Footer";
+
 import MyProducts from "./pages/AdminD/Missubastas";
 import UserBids from "./pages/AdminD/Mispujas";
 
