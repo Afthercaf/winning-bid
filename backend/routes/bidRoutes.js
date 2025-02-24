@@ -4,6 +4,7 @@ const Bid = require("../models/Bid");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const Role = require("../models/Role");
+const Order = require("../models/Order");
 const WebSocketManager = require("../websocket");
 const router = express.Router();
 const bcrypt = require("bcrypt"); // Para encriptar contraseñas
@@ -139,11 +140,9 @@ router.post("/:productId/bid-j", async (req, res) => {
 
     res.status(200).json({ message: "Puja actualizada con éxito" });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        message: error.message || "Error al crear o actualizar la puja",
-      });
+    res.status(400).json({
+      message: error.message || "Error al crear o actualizar la puja",
+    });
   }
 });
 
@@ -163,16 +162,14 @@ router.get("/:productId/bids", async (req, res) => {
       Bid.countDocuments({ auctionId: productId }),
     ]);
 
-    res
-      .status(200)
-      .json({
-        bids,
-        pagination: {
-          total,
-          page: Number(page),
-          pages: Math.ceil(total / limit),
-        },
-      });
+    res.status(200).json({
+      bids,
+      pagination: {
+        total,
+        page: Number(page),
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: "Error al obtener las pujas", error });
   }
@@ -498,107 +495,71 @@ router.post("/pay", async (req, res) => {
 
     console.log("✔ Usuario encontrado:", buyer.name);
 
-    // Crear cliente en Conekta si no existe
-    let customerId;
-    try {
-      customerId = await createCustomerIfNotExists(buyer);
-    } catch (error) {
-      console.error("❌ Error al crear el cliente en Conekta:", error);
-      return res
-        .status(500)
-        .json({ message: "Error al crear el cliente en Conekta" });
-    }
-
-    // Crear una orden en Conekta con pago en OXXO
-    let order;
-    try {
-      order = await ordersClient.createOrder({
-        currency: "MXN",
-        customer_info: {
-          customer_id: customerId,
+    // Crear cliente en Conekta y orden
+    const customerId = await createCustomerIfNotExists(buyer);
+    const conektaOrder = await ordersClient.createOrder({
+      currency: "MXN",
+      customer_info: {
+        customer_id: customerId,
+      },
+      line_items: [
+        {
+          name: `Pago C2C por producto ${productId}`,
+          unit_price: amount * 100,
+          quantity: 1,
         },
-        line_items: [
-          {
-            name: `Pago C2C por producto ${productId}`,
-            unit_price: amount * 100,
-            quantity: 1,
+      ],
+      charges: [
+        {
+          payment_method: {
+            type: "oxxo_cash",
+            expires_at: Math.floor(Date.now() / 1000) + 172800,
           },
-        ],
-        charges: [
-          {
-            payment_method: {
-              type: "oxxo_cash",
-              expires_at: Math.floor(Date.now() / 1000) + 172800,
-            },
-          },
-        ],
-      });
+        },
+      ],
+    });
 
-      console.log("✔ Orden creada exitosamente:", order.data.id);
-    } catch (error) {
-      console.error(
-        "❌ Error al crear la orden en Conekta:",
-        error.response?.data || error.message
-      );
-      return res
-        .status(500)
-        .json({ message: "Error al crear la orden en Conekta" });
-    }
+    const payoutOrder = await createPayoutOrder(
+      amount,
+      customerId,
+      seller,
+      productId,
+      sellerId,
+      userId,
+      conektaOrder.data.id
+    );
 
-    // Validar que el vendedor tenga una tarjeta registrada
-    if (!seller.paymentInfo?.cardToken) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "El vendedor no tiene una tarjeta registrada para recibir pagos",
-        });
-    }
+    // Guardar la orden en la base de datos
+    const newOrder = new Order({
+      product_id: productId,
+      buyer_id: userId,
+      seller_id: sellerId,
+      price: amount,
+      status: "pendiente",
+      conekta_order_id: conektaOrder.data.id,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
 
-    // Crear payout order para transferir al vendedor
-    let payoutOrder;
-    try {
-      payoutOrder = await createPayoutOrder(
-        amount,
-        customerId,
-        seller,
-        productId,
-        sellerId,
-        userId,
-        order.data.id
-      );
-      console.log("✔ Payout order creada exitosamente:", payoutOrder.id);
-    } catch (error) {
-      if (
-        error.response?.data?.details?.[0]?.code ===
-        "conekta.errors.parameter_validation.payout.disabled"
-      ) {
-        return res.status(403).json({
-          message:
-            "Su cuenta de Conekta no tiene habilitada la función de pagos a terceros. Por favor contacte a su ejecutivo de cuenta.",
-          details: error.response.data,
-        });
-      }
+    await newOrder.save();
 
-      return res
-        .status(500)
-        .json({
-          message: "Error al transferir fondos al vendedor",
-          details: error.response?.data,
-        });
-    }
+    console.log("💾 Orden guardada en la base de datos:", newOrder._id);
 
     // Responder con éxito
     res.status(200).json({
       message: "Pago y orden de pago creados exitosamente",
-      order: order.data,
+      order: {
+        ...conektaOrder.data,
+        internal_order_id: newOrder._id,
+      },
       payoutOrder,
     });
   } catch (error) {
     console.error("❌ Error al procesar el pago:", error);
-    res
-      .status(500)
-      .json({ message: "Error al procesar el pago", error: error.message });
+    res.status(500).json({
+      message: "Error al procesar el pago",
+      error: error.message,
+    });
   }
 });
 
@@ -646,6 +607,218 @@ router.get("/payout/status/:payoutOrderId", async (req, res) => {
     res.status(500).json({
       message: "Error al obtener el estado del pago",
       error: error.response?.data || error.message,
+    });
+  }
+});
+
+// Ruta para registrar información de pago del vendedor
+router.post("/register-payment-info", async (req, res) => {
+  try {
+    const { userId, cardNumber, bankAccount, clabe } = req.body;
+
+    // Validar que el usuario existe
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "ID de usuario inválido" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Objeto para almacenar la información de pago actualizada
+    const paymentInfo = {};
+
+    // Validar y procesar la tarjeta si se proporciona
+    if (cardNumber) {
+      // Validar que la tarjeta tenga exactamente 16 dígitos
+      if (!/^\d{16}$/.test(cardNumber)) {
+        return res.status(400).json({
+          message: "El número de tarjeta debe tener 16 dígitos",
+        });
+      }
+      paymentInfo.cardToken = `tok_${cardNumber.slice(-4)}`;
+      paymentInfo.last4Digits = cardNumber.slice(-4);
+    }
+
+    // Validar y procesar la CLABE si se proporciona
+    if (clabe) {
+      // Validar que la CLABE tenga exactamente 18 dígitos
+      if (!/^\d{18}$/.test(clabe)) {
+        return res.status(400).json({
+          message: "La CLABE debe tener 18 dígitos",
+        });
+      }
+      paymentInfo.clabe = clabe;
+    }
+
+    // Validar y procesar la cuenta bancaria si se proporciona
+    if (bankAccount) {
+      // Validar el formato de la cuenta bancaria (ajusta según tus necesidades)
+      if (!/^\d{10,16}$/.test(bankAccount)) {
+        return res.status(400).json({
+          message: "Número de cuenta bancaria inválido",
+        });
+      }
+      paymentInfo.bankAccount = bankAccount;
+    }
+
+    // Verificar que se proporcionó al menos un método de pago
+    if (Object.keys(paymentInfo).length === 0) {
+      return res.status(400).json({
+        message:
+          "Debe proporcionar al menos un método de pago (tarjeta, CLABE o cuenta bancaria)",
+      });
+    }
+
+    // Actualizar la información de pago del usuario
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: { paymentInfo },
+      },
+      { new: true }
+    ).select("-password");
+
+    // Crear o actualizar el cliente en Conekta si es necesario
+    try {
+      await createCustomerIfNotExists({
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      });
+    } catch (error) {
+      console.error("⚠️ Error al registrar en Conekta:", error);
+      // No detenemos el proceso si falla Conekta
+    }
+
+    res.status(200).json({
+      message: "Información de pago actualizada exitosamente",
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        paymentInfo: updatedUser.paymentInfo,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error al registrar información de pago:", error);
+    res.status(500).json({
+      message: "Error al actualizar la información de pago",
+      error: error.message,
+    });
+  }
+});
+
+// Ruta para obtener todos los productos vendidos de un vendedor
+router.get("/:sellerId/sales", async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    const { page = 1, limit = 10, status } = req.query;
+
+    console.log("⭐ Buscando ventas para el vendedor:", sellerId);
+
+    // Validar el ID del vendedor
+    if (!mongoose.Types.ObjectId.isValid(sellerId)) {
+      return res.status(400).json({ message: "ID de vendedor inválido" });
+    }
+
+    // Construir el filtro base
+    const filter = { seller_id: new mongoose.Types.ObjectId(sellerId) };
+
+    // Agregar filtro por estado si se proporciona
+    if (status) {
+      filter.status = status;
+    }
+
+    console.log("📋 Filtro de búsqueda:", JSON.stringify(filter));
+
+    // Calcular el skip para la paginación
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Pipeline de agregación
+    const pipeline = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: "users",
+          localField: "buyer_id",
+          foreignField: "_id",
+          as: "buyerInfo",
+        },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "product_id",
+          foreignField: "_id",
+          as: "productInfo",
+        },
+      },
+      { $unwind: "$buyerInfo" },
+      { $unwind: "$productInfo" },
+      {
+        $project: {
+          _id: 1,
+          conekta_order_id: 1,
+          price: 1,
+          status: 1,
+          created_at: 1,
+          updated_at: 1,
+          buyer: {
+            id: "$buyerInfo._id",
+            name: "$buyerInfo.name",
+            email: "$buyerInfo.email",
+          },
+          product: {
+            id: "$productInfo._id",
+            name: "$productInfo.name",
+            price: "$productInfo.currentPrice",
+            image: "$productInfo.image",
+            type: "$productInfo.type",
+          },
+        },
+      },
+      { $sort: { created_at: -1 } },
+      { $skip: skip },
+      { $limit: parseInt(limit) },
+    ];
+
+    console.log("🔍 Ejecutando pipeline de agregación...");
+
+    // Ejecutar la agregación
+    const [sales, totalCount] = await Promise.all([
+      mongoose.model("Order").aggregate(pipeline),
+      mongoose.model("Order").countDocuments(filter),
+    ]);
+
+    console.log("📊 Resultados encontrados:", sales.length);
+    console.log("📈 Total de documentos:", totalCount);
+
+    // Verificar si hay órdenes en la base de datos
+    const totalOrders = await mongoose.model("Order").countDocuments({});
+    console.log("🔢 Total de órdenes en la base de datos:", totalOrders);
+
+    // Calcular el total de páginas
+    const totalPages = Math.ceil(totalCount / parseInt(limit));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        sales,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalItems: totalCount,
+          itemsPerPage: parseInt(limit),
+        },
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error al obtener ventas del vendedor:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener las ventas",
+      error: error.message,
     });
   }
 });
