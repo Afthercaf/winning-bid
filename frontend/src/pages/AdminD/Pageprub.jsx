@@ -2,7 +2,7 @@ import React from "react";
 import Sidebar from '../../components/sidebar/Sidebar'; // Asegúrate de que el Sidebar está correctamente importado
 import Navbar from '../../components/navbar/navbarComponent';
 
-import "./Pageprub.css"
+import "../../styles/Pageprub.css"
 
 
 

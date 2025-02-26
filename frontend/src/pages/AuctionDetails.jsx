@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar/navbarComponent";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
-import "../pages/AuctionDetails.css";
+import "../styles/AuctionDetails.css";
 import { FaArrowLeft } from "react-icons/fa";
 
 const AuctionDetails = () => {

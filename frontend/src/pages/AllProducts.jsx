@@ -3,7 +3,7 @@ import Navbar from "../components/navbar/navbarComponent";
 
 import SeccionCategorias from "../components/Categorias";
 import CardsProducts from "../components/cards";
-import "./AllProducts.css"; // Importa el CSS de la página
+import "../styles/AllProducts.css"; // Importa el CSS de la página
 
 const AllProducts = () => {
     const [selectedCategory, setSelectedCategory] = useState("All");
