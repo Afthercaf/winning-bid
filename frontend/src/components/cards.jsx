@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import io from "socket.io-client"; // Importa socket.io
 import api from "../../api";
 import { AuthContext } from "../context/AuthContext";
-import "./cards.css";
+import "./cartss.css";
 
 const socket = io("https://winning-bid.onrender.com"); // Conéctate al backend
 

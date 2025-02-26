@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../pages/CrearSubasta.css";
+import "../styles/CrearSubasta.css";
 
 const CrearSubasta = () => {
     const [images, setImages] = useState([]);

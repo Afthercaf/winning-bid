@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import api from '../../api';
-import './Compras.css';
+import '../styles/Compras.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 

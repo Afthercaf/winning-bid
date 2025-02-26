@@ -1,6 +1,6 @@
 // src/components/SpecialOffers.jsx
 import React from 'react';
-import './SpecialOffers.css';
+import './Special.css';
 
 const SpecialOffers = () => {
     return (

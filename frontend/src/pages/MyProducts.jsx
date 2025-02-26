@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import './MyProducts.css';
+import '../styles/MyProducts.css';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { AuthContext } from '../context/AuthContext';

@@ -1,5 +1,5 @@
 import React from 'react';
-import './Footer.css';
+import './Foot.css';
 
 import logo from '../../assets/winningbid_lopgp-removebg-preview.png';
 import { FaFacebook, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";

@@ -4,7 +4,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import "./FlashAuction.css";
+import "./Flash.css";
 
 // Flecha personalizada izquierda (prev)
 const PrevArrow = ({ onClick }) => (

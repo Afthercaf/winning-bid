@@ -6,7 +6,7 @@ import Navbar from "../components/navbar/navbarComponent";
 
 import api from "../../api";
 import { AuthContext } from "../context/AuthContext";
-import "./DetallesAllProducts.css";
+import "../styles/DetallesAllProducts.css";
 
 const DetallesAllProducts = () => {
   const { productId } = useParams();

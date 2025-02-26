@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './LocalMarketsCarousel.css';
+import './LocalMarkets.css';
 import tianguis1 from '../../assets/tianguis1.jpeg';
 import tianguis2 from '../../assets/tianguis2.jpeg';
 import tianguis3 from '../../assets/tianguis3.jpeg';

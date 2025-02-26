@@ -1,7 +1,7 @@
 // src/components/Regi.js
 import React, { useState } from 'react';
 import api from '../../../api'; // Asegúrate de tener la configuración de la API}
-import "./regis.css"
+import "./regista.css"
 
 const Regi = () => {
   const [user, setUser] = useState({

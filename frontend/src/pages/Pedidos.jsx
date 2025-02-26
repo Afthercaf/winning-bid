@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar/Sidebar';
 import api from '../../api'; // Importar `api` en lugar de `axios`
-import './Pedidos.css';
+import '../styles/Pedidos.css';
 
 const Pedidos = () => {
   const [pedidos, setPedidos] = useState([]);

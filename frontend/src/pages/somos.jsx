@@ -1,5 +1,5 @@
 import React from 'react';
-import './WhoWeAre.css';
+import '../styles/WhoWeAre.css';
 import { useNavigate } from 'react-router-dom'; // Actualiza la importación a useNavigate
 import Footer from '../components/footer/Footer';
 

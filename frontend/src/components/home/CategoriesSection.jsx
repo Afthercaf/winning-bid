@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchUnsplashImage } from "../../services/unsplashService";
 import axios from "axios";
-import "./CategoriesSection.css";
+import "./Categories.css";
 
 const CategoriesSection = () => {
   const [categories, setCategories] = useState([]);

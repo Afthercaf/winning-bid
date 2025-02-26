@@ -3,7 +3,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../components/navbar/navbarComponent";
 import Footer from "../components/footer/Footer";
-import "./Loser.css";
+import "../styles/Loser.css";
 
 const Loser = () => {
   const { productId } = useParams();

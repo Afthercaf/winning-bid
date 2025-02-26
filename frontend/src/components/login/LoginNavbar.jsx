@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import "./LoginNavbar.css";
+import "./LogNav.css";
 
 const LoginNavbar = () => {
   const location = useLocation();

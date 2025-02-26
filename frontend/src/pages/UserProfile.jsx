@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import './UserProfile.css';
+import '../styles/UserProfile.css';
 import { FaArrowLeft } from 'react-icons/fa';
 import Navbar from '../components/navbar/navbarComponent';
 import Sidebar from '../components/sidebar/Sidebar';

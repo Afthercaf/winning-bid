@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import './CreateProduct.css';
+import './CrearteP.css';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { UserProductsContext } from '../../context/UserProductsContext';

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Chart, CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import api from '../../../api'; // Usamos `api` en lugar de `axios`
-import './SalesChart.css';
+import './Sales.css';
 
 Chart.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend);
 

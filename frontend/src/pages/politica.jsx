@@ -1,5 +1,5 @@
 import React from 'react';
-import './PrivacyPolicy.css';  // Importa el archivo CSS
+import '../styles/PrivacyPolicy.css';  // Importa el archivo CSS
 import { useNavigate } from 'react-router-dom'; // Usamos useNavigate en lugar de useHistory
 import Footer from '../components/footer/Footer'; // Asegúrate de que Footer está correctamente importado
 

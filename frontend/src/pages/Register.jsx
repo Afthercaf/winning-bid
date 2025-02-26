@@ -1,6 +1,6 @@
 // src/pages/Register.js
 import React from 'react';
-import './Register.css';
+import '../styles/Register.css';
 import illustration from '../assets/winningbid_lopgp-removebg-preview.png';
 import Regi from '../components/registeros/regis'; // Importamos el componente Regi
 import LoginNavbar from '../components/login/LoginNavbar';

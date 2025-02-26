@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../../api';
-import './DailyDeals.css';
+import './Daily.css';
 
 const DailyDeals2 = () => {
   const [dailyDeals, setDailyDeals] = useState([]);

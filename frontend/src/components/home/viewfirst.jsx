@@ -1,5 +1,5 @@
 import React from 'react';
-import './viewfirst.css'; // Asegúrate de crear este archivo para los estilos personalizados
+import './viewt.css'; // Asegúrate de crear este archivo para los estilos personalizados
 import { useNavigate } from 'react-router-dom';
 
 

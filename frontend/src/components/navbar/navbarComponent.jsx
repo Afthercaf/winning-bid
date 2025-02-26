@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import './navbarComponent.css';
+import './Conav.css';
 import { FaBell, FaStore } from 'react-icons/fa';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../../api';

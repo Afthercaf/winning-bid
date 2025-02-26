@@ -1,5 +1,5 @@
 import React from "react";
-import "../pages/Subastas.css";
+import "../styles/Subastas.css";
 import Navbar from "../components/navbar/navbarComponent";
 
 const Subastas = () => {

@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { faHome, faUser, faHistory, faGripHorizontal, faPlusCircle, faSignOutAlt, faCrown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import "./Sidebar.css";
+import "./Sidevr.css";
 
 const Sidebar = (userId = userId) => {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../api';
-import './PedidoEstado.css';
+import '../styles/PedidoEstado.css';
 
 const PedidoEstado = () => {
   const { orderId } = useParams(); // Cambiamos a orderId

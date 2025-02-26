@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./ProductosRelacionados.css";
+import "./Produrel.css";
 import { FaShoppingCart } from "react-icons/fa";
 
 const ProductosRelacionados = () => {

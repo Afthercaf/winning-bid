@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api";
-import "./Categorias.css"; // Importa el CSS de este componente
+import "./Category.css"; // Importa el CSS de este componente
 
 const SeccionCategorias = ({ selectedCategory, setSelectedCategory, selectedType, setSelectedType }) => {
     const [categories, setCategories] = useState([]);

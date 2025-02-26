@@ -1,7 +1,7 @@
 import React from "react";
 import LoginNavbar from "../components/login/LoginNavbar";
 import LoginComp from "../components/login/LoginCom";
-import "./Login.css";
+import "../styles/Login.css";
 
 const Login = () => {
   return (

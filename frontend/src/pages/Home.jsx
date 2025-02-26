@@ -3,7 +3,7 @@ import React from 'react';
 import FlasAuction from '../components/home/FlashAuctions';
 import Footer from '../components/footer/Footer';
 import CategoriesSection from '../components/home/CategoriesSection';
-import './Home.css';
+import '../styles/Home.css';
 import Navbar from '../components/navbar/navbarComponent';
 import Principal from '../components/home/viewfirst';
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar/Sidebar';
 import { FaDollarSign, FaBox, FaUser } from 'react-icons/fa';
-import './Dashboard.css';
+import '../styles/Dashboard.css';
 import api from '../../api'; // Importar `api` en lugar de `axios`
 import SalesChart from '../components/SalesChart/SalesChart';
 import Navbar from '../components/navbar/navbarComponent';

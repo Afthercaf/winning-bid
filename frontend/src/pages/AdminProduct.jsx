@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar/Sidebar';
 import api from '../../api'; // Importamos `api` en lugar de `axios`
 import CategoriesModal from '../components/CategoriesButton/CategoriesModal'; // Asegúrate de que la ruta es correcta
-import './AdminProduct.css';
+import '../';
 
 const Productos = () => {
   const [productos, setProductos] = useState([]);

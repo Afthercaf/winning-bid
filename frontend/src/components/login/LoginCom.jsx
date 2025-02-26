@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 import { AuthContext } from "../../context/AuthContext";
-import "./LoginComp.css";
+import "./LoginC.css";
 import ImagenEjemplo from "../../assets/winningbid_lopgp-removebg-preview.png"
 
 const LoginComp = () => {

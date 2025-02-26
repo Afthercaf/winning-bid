@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './PrivacyPolicy.css'; // Asegúrate de tener el archivo CSS
+import '../styles/PrivacyPolicy.css'; // Asegúrate de tener el archivo CSS
 import Footer from '../components/footer/Footer';
 
 const PrivacyPolicy = () => {

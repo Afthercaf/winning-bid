@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../../api';
-import './Recommendations.css';
+import './Recommend.css';
 
 const Recommendations = () => {
   const [recommendedProducts, setRecommendedProducts] = useState([]);

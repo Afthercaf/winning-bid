@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../api'; // Cambia a `api`
-import './CategoriesModal.css';
+import './Categories.css';
 
 const CategoriesModal = ({ closeModal }) => {
   const [categories, setCategories] = useState([]);
