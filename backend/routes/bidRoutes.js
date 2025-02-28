@@ -823,4 +823,111 @@ router.get("/:sellerId/sales", async (req, res) => {
   }
 });
 
+// Ruta para obtener productos ganados por un comprador
+router.get("/:buyerId/won-products", async (req, res) => {
+  try {
+    const { buyerId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+
+    console.log('⭐ Buscando productos ganados para el comprador:', buyerId);
+
+    // Validar el ID del comprador
+    if (!mongoose.Types.ObjectId.isValid(buyerId)) {
+      return res.status(400).json({ message: "ID de comprador inválido" });
+    }
+
+    // Construir el filtro base
+    const filter = { 
+      buyer_id: new mongoose.Types.ObjectId(buyerId),
+      status: { $in: ['pendiente', 'confirmado_por_vendedor', 'completado'] }
+    };
+
+    // Calcular el skip para la paginación
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Pipeline de agregación
+    const pipeline = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: "users",
+          localField: "seller_id",
+          foreignField: "_id",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "product_id",
+          foreignField: "_id",
+          as: "productInfo",
+        },
+      },
+      { $unwind: "$sellerInfo" },
+      { $unwind: "$productInfo" },
+      {
+        $project: {
+          _id: 1,
+          conekta_order_id: 1,
+          price: 1,
+          status: 1,
+          created_at: 1,
+          updated_at: 1,
+          seller: {
+            id: "$sellerInfo._id",
+            name: "$sellerInfo.name",
+            email: "$sellerInfo.email",
+          },
+          product: {
+            id: "$productInfo._id",
+            name: "$productInfo.name",
+            price: "$productInfo.currentPrice",
+            image: "$productInfo.image",
+            type: "$productInfo.type",
+            description: "$productInfo.description"
+          }
+        },
+      },
+      { $sort: { created_at: -1 } },
+      { $skip: skip },
+      { $limit: parseInt(limit) },
+    ];
+
+    console.log('🔍 Ejecutando pipeline de agregación...');
+
+    // Ejecutar la agregación
+    const [wonProducts, totalCount] = await Promise.all([
+      mongoose.model("Order").aggregate(pipeline),
+      mongoose.model("Order").countDocuments(filter),
+    ]);
+
+    console.log('📊 Productos ganados encontrados:', wonProducts.length);
+    console.log('📈 Total de productos:', totalCount);
+
+    // Calcular el total de páginas
+    const totalPages = Math.ceil(totalCount / parseInt(limit));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        wonProducts,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalItems: totalCount,
+          itemsPerPage: parseInt(limit),
+        },
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error al obtener productos ganados:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener los productos ganados",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

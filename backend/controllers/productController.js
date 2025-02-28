@@ -26,9 +26,9 @@ export const createProduct = [
     upload.array('images', 5),
     async (req, res) => {
         try {
-            const { name, description, category, auctionType, type, flashDuration, startingPrice, auctionStartTime, auctionEndTime, puja1, puja2, puja3 } = req.body;
+            const { name, description, category, auctionType, type, flashDuration, startingPrice, auctionStartTime, auctionEndTime } = req.body;
 
-            if (!name || !description || !category || !puja1 || !puja2 || !puja3) {
+            if (!name || !description || !category ) {
                 return res.status(400).json({ error: 'Faltan datos obligatorios' });
             }
 
@@ -59,8 +59,7 @@ export const createProduct = [
                 auctionEndTime: type === 'subasta' ? auctionEndTime : undefined,
                 seller_id: req.user.id,
                 currentPrice: type === 'subasta' ? startingPrice : undefined,
-                pujas: [parseInt(puja1), parseInt(puja2), parseInt(puja3)], // Añadir las pujas al producto
-            });
+                });
 
             await newProduct.save();
             res.status(201).json(newProduct);

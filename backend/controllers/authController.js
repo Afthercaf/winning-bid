@@ -3,7 +3,7 @@
 const jwt = require('jsonwebtoken');
 
 const generateAccessToken = (user) => {
-    return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '15m' }); // Token de acceso con corta duración
+    return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '7d' }); // Token de acceso con corta duración
 };
 
 const generateRefreshToken = (user) => {

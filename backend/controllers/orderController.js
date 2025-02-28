@@ -9,7 +9,7 @@ const axios = require('axios');
 const Bid = require("../models/Bid");
 
 // 🔹 *Configuración de Conekta*
-const API_KEY = "key_lucr1u8feoEOd6BY9nQuPZp"; // Reemplaza con tu clave privada
+const API_KEY =  process.env.CONEKTA_API_KEY;  // Reemplaza con tu clave privada
 const config = new Configuration({ accessToken: API_KEY });
 const customersClient = new CustomersApi(config);
 const ordersClient = new OrdersApi(config);
