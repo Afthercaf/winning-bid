@@ -829,7 +829,7 @@ router.get("/:buyerId/won-products", async (req, res) => {
     const { buyerId } = req.params;
     const { page = 1, limit = 10 } = req.query;
 
-    console.log('⭐ Buscando productos ganados para el comprador:', buyerId);
+    console.log("⭐ Buscando productos ganados para el comprador:", buyerId);
 
     // Validar el ID del comprador
     if (!mongoose.Types.ObjectId.isValid(buyerId)) {
@@ -837,9 +837,9 @@ router.get("/:buyerId/won-products", async (req, res) => {
     }
 
     // Construir el filtro base
-    const filter = { 
+    const filter = {
       buyer_id: new mongoose.Types.ObjectId(buyerId),
-      status: { $in: ['pendiente', 'confirmado_por_vendedor', 'completado'] }
+      status: { $in: ["pendiente", "confirmado_por_vendedor", "completado"] },
     };
 
     // Calcular el skip para la paginación
@@ -885,8 +885,8 @@ router.get("/:buyerId/won-products", async (req, res) => {
             price: "$productInfo.currentPrice",
             image: "$productInfo.image",
             type: "$productInfo.type",
-            description: "$productInfo.description"
-          }
+            description: "$productInfo.description",
+          },
         },
       },
       { $sort: { created_at: -1 } },
@@ -894,7 +894,7 @@ router.get("/:buyerId/won-products", async (req, res) => {
       { $limit: parseInt(limit) },
     ];
 
-    console.log('🔍 Ejecutando pipeline de agregación...');
+    console.log("🔍 Ejecutando pipeline de agregación...");
 
     // Ejecutar la agregación
     const [wonProducts, totalCount] = await Promise.all([
@@ -902,8 +902,8 @@ router.get("/:buyerId/won-products", async (req, res) => {
       mongoose.model("Order").countDocuments(filter),
     ]);
 
-    console.log('📊 Productos ganados encontrados:', wonProducts.length);
-    console.log('📈 Total de productos:', totalCount);
+    console.log("📊 Productos ganados encontrados:", wonProducts.length);
+    console.log("📈 Total de productos:", totalCount);
 
     // Calcular el total de páginas
     const totalPages = Math.ceil(totalCount / parseInt(limit));
@@ -925,6 +925,111 @@ router.get("/:buyerId/won-products", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error al obtener los productos ganados",
+      error: error.message,
+    });
+  }
+});
+
+// Obtener detalles de un producto específico
+router.get("/product/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    console.log("🔍 Buscando producto con ID:", productId);
+
+    // Validar el ID del producto
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID de producto inválido",
+      });
+    }
+
+    // Pipeline de agregación para obtener toda la información necesaria
+    const pipeline = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(productId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "seller_id",
+          foreignField: "_id",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $lookup: {
+          from: "bids",
+          localField: "_id",
+          foreignField: "auctionId",
+          as: "bids",
+        },
+      },
+      { $unwind: "$sellerInfo" },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          startingPrice: 1,
+          currentPrice: 1,
+          type: 1,
+          status: 1,
+          image: 1,
+          created_at: 1,
+          updated_at: 1,
+          endTime: 1,
+          seller: {
+            _id: "$sellerInfo._id",
+            name: "$sellerInfo.name",
+            email: "$sellerInfo.email",
+            avatar: "$sellerInfo.avatar",
+          },
+          totalBids: { $size: "$bids" },
+          highestBid: {
+            $max: {
+              $cond: [
+                { $gt: [{ $size: "$bids" }, 0] },
+                "$bids.bidAmount",
+                "$startingPrice",
+              ],
+            },
+          },
+        },
+      },
+    ];
+
+    // Ejecutar la agregación
+    const product = await mongoose.model("Product").aggregate(pipeline);
+
+    // Verificar si se encontró el producto
+    if (!product || product.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Producto no encontrado",
+      });
+    }
+
+    // Verificar si la subasta ha terminado
+    const productData = product[0];
+    if (productData.endTime && new Date(productData.endTime) < new Date()) {
+      productData.status = "finalizado";
+    }
+
+    console.log("✅ Producto encontrado:", productData.name);
+
+    res.status(200).json({
+      success: true,
+      data: productData,
+    });
+  } catch (error) {
+    console.error("❌ Error al obtener detalles del producto:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener detalles del producto",
       error: error.message,
     });
   }
