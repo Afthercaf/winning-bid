@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 
 # Google Cloud credentials
-backend
 *.env
 # Ignore cloned repo and git-filter-repo
 marketapp_clean/
