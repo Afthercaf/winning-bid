@@ -77,7 +77,7 @@ const Clientes = () => {
                   <td>{indexOfFirstClient + index + 1}</td>
                   <td>
                     <img
-                      src={`http://localhost:5000/${client.avatar}`}
+                      src={`https://winning-bid.onrender.com/${client.avatar}`}
                       alt="Avatar"
                       className="avatar-img"
                     />

@@ -36,7 +36,7 @@ const Navbar = () => {
           });
           const data = await response.json();
           if (data.avatar) {
-            setAvatar(`http://localhost:5000/${data.avatar}`);
+            setAvatar(`https://winning-bid.onrender.com/${data.avatar}`);
           }
         }
       } catch (error) {
