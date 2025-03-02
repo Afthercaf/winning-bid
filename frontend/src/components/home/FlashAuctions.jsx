@@ -26,7 +26,7 @@ const FlashAuction = () => {
   useEffect(() => {
     const fetchFlashAuctions = async () => {
       try {
-        const response = await axios.get("https://winning-bid.onrender.com/api/products/subastasflas");
+        const response = await axios.get("https://winning-bid-zmiw.onrender.com/api/products/subastasflas");
         setAuctions(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error("❌ Error al obtener las subastas flash:", error);

@@ -54,7 +54,7 @@ const DetallesAllProducts = () => {
   };
 
   useEffect(() => {
-    const newSocket = io("https://winning-bid.onrender.com");
+    const newSocket = io("https://winning-bid-zmiw.onrender.com");
     setSocket(newSocket);
 
     newSocket.emit("joinRoom", productId);
@@ -151,7 +151,7 @@ const DetallesAllProducts = () => {
 
   const createPaymentOrder = async () => {
     try {
-      const response = await api.post("https://winning-bid.onrender.com/api/orders/crear-orden", {
+      const response = await api.post("https://winning-bid-zmiw.onrender.com/api/orders/crear-orden", {
         productId,
         userId,
         amount: auctionData.currentPrice,

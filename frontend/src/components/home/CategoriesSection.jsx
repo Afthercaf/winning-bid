@@ -11,7 +11,7 @@ const CategoriesSection = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("https://winning-bid.onrender.com/api/categories");
+        const response = await axios.get("https://winning-bid-zmiw.onrender.com/api/categories");
 
         const categoriesWithImages = await Promise.all(
           response.data.map(async (category) => {

@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(",")
-  : process.env.CORS_ORIGIN || "*";
+  : process.env.CORS_ORIGIN || "https://winning-bid-rl3b.vercel.app" ||  "*"  ;
 
 // Configurar CORS para Web y Móviles
 app.use(

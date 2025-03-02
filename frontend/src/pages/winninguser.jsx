@@ -28,7 +28,7 @@ const UserWinning = () => {
     const fetchUsers = async () => {
         try {
             const response = await axios.get(
-                `https://winning-bid.onrender.com/api/users?page=${page}&limit=20`
+                `https://winning-bid-zmiw.onrender.com/api/users?page=${page}&limit=20`
             );
             setUsers(response.data.data);
             setTotalPages(response.data.totalPages);
@@ -81,7 +81,7 @@ const UserWinning = () => {
                         {users.map((user) => (
                             <TableRow key={user._id}>
                                 <TableCell>
-                                    <Avatar src={`https://winning-bid.onrender.com/${user.avatar}`} />
+                                    <Avatar src={`https://winning-bid-zmiw.onrender.com/${user.avatar}`} />
                                 </TableCell>    
                                 <TableCell>{user.name}</TableCell>
                                 <TableCell>{user.email}</TableCell>

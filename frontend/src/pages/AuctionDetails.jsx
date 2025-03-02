@@ -21,7 +21,7 @@ const AuctionDetails = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.get(`https://winning-bid.onrender.com/api/products/${productId}`);
+                const response = await axios.get(`https://winning-bid-zmiw.onrender.com/api/products/${productId}`);
                 setProduct(response.data);
                 setSelectedImage(response.data.images[0]);
             } catch (error) {
@@ -31,7 +31,7 @@ const AuctionDetails = () => {
 
         const fetchBids = async () => {
             try {
-                const response = await axios.get(`https://winning-bid.onrender.com/api/bids/${productId}/bids`);
+                const response = await axios.get(`https://winning-bid-zmiw.onrender.com/api/bids/${productId}/bids`);
                 setBids(response.data);
 
                 if (response.data.length > 0) {
@@ -87,7 +87,7 @@ const AuctionDetails = () => {
         }
 
         try {
-            const response = await axios.post(`https://winning-bid.onrender.com/api/bids/${productId}/bid`, {
+            const response = await axios.post(`https://winning-bid-zmiw.onrender.com/api/bids/${productId}/bid`, {
                 userId: userId,
                 bidAmount: parseFloat(bidAmount),
             });

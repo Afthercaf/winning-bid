@@ -5,7 +5,7 @@ import api from "../../api";
 import { AuthContext } from "../context/AuthContext";
 import "./cartss.css";
 
-const socket = io("https://winning-bid.onrender.com"); // Conéctate al backend
+const socket = io("https://winning-bid-zmiw.onrender.com"); // Conéctate al backend
 
 const CardsProducts = ({ selectedCategory, selectedType }) => {
     const { userId } = useContext(AuthContext);

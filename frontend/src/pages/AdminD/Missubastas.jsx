@@ -12,7 +12,7 @@ const MyProducts = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get(`https://winning-bid.onrender.com/api/products/user/${userId}/products`);
+                const response = await axios.get(`https://winning-bid-zmiw.onrender.com/api/products/user/${userId}/products`);
                 setProducts(response.data);
             } catch (error) {
                 console.error('Error al cargar productos', error);

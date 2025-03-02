@@ -9,7 +9,7 @@ const UserBids = () => {
     useEffect(() => {
         const fetchBids = async () => {
             try {
-                const response = await axios.get(`https://winning-bid.onrender.com/api/users/user-bids/${userId}`);
+                const response = await axios.get(`https://winning-bid-zmiw.onrender.com/api/users/user-bids/${userId}`);
                 if (Array.isArray(response.data)) {
                     setBids(response.data);
                 } else {
