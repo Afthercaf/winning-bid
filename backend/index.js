@@ -89,6 +89,9 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
+
+
+
 // Endpoint para obtener usuarios
 app.get("/api/users2", async (req, res) => {
   try {
