@@ -14,10 +14,10 @@ const UserProfile = () => {
     if (userId) {
       const fetchAvatar = async () => {
         try {
-          const response = await fetch(`https://winning-bid.onrender.com/api/users/${userId}/avatar`, { credentials: 'include' });
+          const response = await fetch(`https://winning-bid-zmiw.onrender.com/api/users/${userId}/avatar`, { credentials: 'include' });
           const data = await response.json();
           if (data.avatar) {
-            setAvatar(`https://winning-bid.onrender.com/${data.avatar}`);
+            setAvatar(`https://winning-bid-zmiw.onrender.com/${data.avatar}`);
           }
         } catch (error) {
           console.error('Error al obtener el avatar:', error);
@@ -51,14 +51,14 @@ const UserProfile = () => {
       formData.append('avatar', selectedFile);
 
       try {
-        const response = await fetch(`https://winning-bid.onrender.com/api/users/${userId}/avatar`, {
+        const response = await fetch(`https://winning-bid-zmiw.onrender.com/api/users/${userId}/avatar`, {
           method: 'PUT',
           body: formData,
           credentials: 'include',
         });
         const data = await response.json();
         if (data.user && data.user.avatar) {
-          const newAvatar = `https://winning-bid.onrender.com/${data.user.avatar}`;
+          const newAvatar = `https://winning-bid-zmiw.onrender.com/${data.user.avatar}`;
           setAvatar(newAvatar);
           updateUserAvatar(newAvatar); // Actualiza el avatar en AuthContext
         }

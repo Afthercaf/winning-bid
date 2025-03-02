@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
   const refreshAccessToken = async () => {
     try {
       const refreshToken = localStorage.getItem('refreshToken');
-      const response = await axios.post('https://winning-bid.onrender.com/api/refresh-token', { refreshToken });
+      const response = await axios.post('https://winning-bid-zmiw.onrender.com/api/refresh-token', { refreshToken });
       const { accessToken, newRefreshToken } = response.data;
       if (accessToken && newRefreshToken) {
         localStorage.setItem('accessToken', accessToken);
