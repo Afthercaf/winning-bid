@@ -208,7 +208,6 @@ export const getUserProducts = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener los productos del usuario' });
     }
 };
-e
 
 
 // En tu controlador, por ejemplo, en controllers/productController.js
