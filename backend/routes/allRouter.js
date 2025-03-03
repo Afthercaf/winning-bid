@@ -19,6 +19,8 @@ const router = express.Router();
 router.get("/auctionos", auctionRoutes);
 router.use("/users", userRoutes);
 router.use("/products", productRoutes);
+router.use("/productsflash", productRoutes);
+router.use("/flash", productRoutes);
 router.use("/orders", orderRoutes);
 router.use("/messages", messageRoutes);
 router.use("/", categoryRoutes);

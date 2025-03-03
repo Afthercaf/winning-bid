@@ -23,13 +23,33 @@ const NextArrow = ({ onClick }) => (
 const FlashAuction = () => {
   const [auctions, setAuctions] = useState([]);
 
+  const calculateTimeLeft = (endTime) => {
+    const difference = +new Date(endTime) - +new Date();
+    let timeLeft = {};
+  
+    if (difference > 0) {
+      timeLeft = {
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60)
+      };
+    }
+  
+    return timeLeft;
+  };
+
   useEffect(() => {
     const fetchFlashAuctions = async () => {
       try {
-        const response = await axios.get("https://winning-bid-zmiw.onrender.com/api/products/subastasflas");
-        setAuctions(Array.isArray(response.data) ? response.data : []);
+        const response = await axios.get("https://winning-bid-zmiw.onrender.com/api/products");
+        const flashProducts = response.data.filter(product => product.auctionType === 'flash');
+        const updatedAuctions = flashProducts.slice(0, 5).map(auction => ({
+          ...auction,
+          timeLeft: calculateTimeLeft(auction.auctionEndTime)
+        }));
+        setAuctions(updatedAuctions);
       } catch (error) {
-        console.error("❌ Error al obtener las subastas flash:", error);
+        console.error("❌ Error al obtener las subastas:", error);
         setAuctions([]);
       }
     };
@@ -39,22 +59,19 @@ const FlashAuction = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setAuctions((prevAuctions) =>
-        prevAuctions.map((auction) => ({
-          ...auction,
-          timeLeft: Math.max(auction.timeLeft - 1, 0),
-        }))
-      );
+      setAuctions(prevAuctions => prevAuctions.map(auction => ({
+        ...auction,
+        timeLeft: calculateTimeLeft(auction.auctionEndTime)
+      })));
     }, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const formatTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours < 10 ? "0" : ""}${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  const formatTime = (timeLeft) => {
+    if (!timeLeft) return "00:00:00"; // Return default format if no time left
+    const { hours, minutes, seconds } = timeLeft;
+    return `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
   };
 
   const settings = {
@@ -66,7 +83,7 @@ const FlashAuction = () => {
     autoplay: true,
     autoplaySpeed: 5000,
     arrows: true,
-   
+    
   };
 
   if (auctions.length === 0) {
@@ -80,8 +97,6 @@ const FlashAuction = () => {
         {auctions.map((auction) => (
           <div className="flash-slide" key={auction._id}>
             <div className="flash-content">
-              
-              {/* Lado Izquierdo con Degradado y Texto */}
               <div className="flash-text-overlay">
                 <div className="flash-gradient"></div> 
                 <div className="flash-text">
@@ -90,15 +105,12 @@ const FlashAuction = () => {
                   <p className="flash-time">
                     ⏳ Tiempo restante: <span className="flash-timer">{formatTime(auction.timeLeft)}</span>
                   </p>
-                  <button className="flash-bid-button">Pujar</button>
+                  <button className="flash-bid-button">Entrar a subasta</button>
                 </div>
               </div>
-
-              {/* Lado Derecho con la Imagen */}
               <div className="flash-image">
-                <img src={auction.image} alt={auction.name} />
+                <img src={auction.images && auction.images[0] ? auction.images[0] : 'https://via.placeholder.com/150'} alt={auction.name} />
               </div>
-
             </div>
           </div>
         ))}

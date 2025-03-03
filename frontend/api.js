@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://winning-bid-zmiw.onrender.com', // Cambia esto por tu URL de API
+    baseURL: 'https://winning-bid-zmiw.onrender.com/api', // Cambia esto por tu URL de API
     withCredentials: true,
 });
 

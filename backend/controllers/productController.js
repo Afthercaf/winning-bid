@@ -208,39 +208,38 @@ export const getUserProducts = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener los productos del usuario' });
     }
 };
+e
 
-export const getFlashAuctions = async (req, res) => {
+
+// En tu controlador, por ejemplo, en controllers/productController.js
+// Controlador para obtener productos tipo 'flash'
+// Controlador para obtener productos tipo 'flash'
+export const getFlashProducts = async (req, res) => {
     try {
-        const flashAuctions = await Product.aggregate([
-            { $match: { type: 'subasta', auctionType: 'flash', isActive: true } }, // Solo subastas flash activas
-            { $sample: { size: 3 } } // Aseguramos que siempre devuelva una lista de hasta 3 productos
-        ]);
-
-        await Product.populate(flashAuctions, { path: 'seller_id', select: 'name email' });
-
-        if (!Array.isArray(flashAuctions) || flashAuctions.length === 0) {
-            return res.status(404).json([]); // ⬅️ Retorna un array vacío en lugar de un objeto
-        }
-
-        // Calculamos el tiempo restante para cada producto
-        const currentTime = new Date();
-        const formattedAuctions = flashAuctions.map(auction => ({
-            _id: auction._id,
-            name: auction.name,
-            description: auction.description.length > 200 ? auction.description.substring(0, 200) + '...' : auction.description,
-            image: auction.images.length > 0 ? auction.images[0] : "https://via.placeholder.com/200",
-            seller: auction.seller_id,
-            timeLeft: Math.max(0, Math.floor((new Date(auction.auctionEndTime) - currentTime) / 1000)), // Tiempo restante en segundos
-            currentPrice: auction.currentPrice || auction.startingPrice,
-        }));
-
-        res.status(200).json(formattedAuctions); // ⬅️ Aseguramos que siempre devuelve un array
-
+        const flashProducts = await Product.find({ auctionType: 'flash' });
+        res.json(flashProducts);
     } catch (error) {
-        console.error('❌ Error al obtener las subastas flash:', error.message);
-        res.status(500).json({ message: 'Error al obtener las subastas flash', error });
+        res.status(500).json({ message: "Error al obtener los productos flash", error });
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const finalizarSubasta = async (req, res) => {
     const { productId } = req.params;
 

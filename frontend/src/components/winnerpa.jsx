@@ -18,7 +18,7 @@ const Winner = () => {
       }
 
       try {
-        const response = await fetch(`https://winning-bid-zmiw.onrender.com/orders/${orderId}`);
+        const response = await fetch(`https://winning-bid-zmiw.onrender.com/api/orders/${orderId}`);
         const text = await response.text();
 
         if (text.includes("<!doctype html>")) {
