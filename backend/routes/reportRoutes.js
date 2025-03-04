@@ -1,13 +1,14 @@
 // routes/reportRoutes.js
-import express from 'express';
-import { createReport, getReports, updateReportStatus, deleteReport } from '../controllers/reportController.js';
-import { authenticate } from '../middleware/authMiddleware.js';
-
+const express = require('express');
 const router = express.Router();
+const reportController = require('../controllers/reportController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-router.post('/reports', authenticate, createReport);
-router.get('/reports', authenticate, getReports);
-router.put('/reports/:reportId', authenticate, updateReportStatus);
-router.delete('/reports/:reportId', authenticate, deleteReport);
 
-export default router;
+
+router.post('/reports', authMiddleware, reportController.createReport);
+router.get('/reports', authMiddleware, reportController.getReports);
+router.put('/reports/:reportId', authMiddleware, reportController.updateReportStatus);
+router.delete('/reports/:reportId', authMiddleware, reportController.deleteReport);
+
+module.exports = router;

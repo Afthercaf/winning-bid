@@ -12,6 +12,7 @@ const wishlistRoutes = require("./wishlistRoutes");
 const notificationRoutes = require("./notificationRoutes");
 const bidRoutes = require("./bidRoutes");
 const auctionRoutes = require("./auctionRoutes");
+const reportRoutes = require("./reportRoutes");
 
 const router = express.Router();
 
@@ -28,5 +29,6 @@ router.use("/reviews", reviewRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/wishlists", wishlistRoutes);
 router.use("/notifications", notificationRoutes);
+router.use("/reports", reportRoutes);
 
 module.exports = router;
