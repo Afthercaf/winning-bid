@@ -6,9 +6,9 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 
 
-router.post('/reports', authMiddleware, reportController.createReport);
-router.get('/reports', authMiddleware, reportController.getReports);
-router.put('/reports/:reportId', authMiddleware, reportController.updateReportStatus);
-router.delete('/reports/:reportId', authMiddleware, reportController.deleteReport);
+router.post('/reports', authMiddleware,reportController.createReport);
+router.get('/reports', reportController.getReports);
+router.put('/reports/:reportId', reportController.updateReportStatus);
+router.delete('/reports/:reportId', reportController.deleteReport);
 
 module.exports = router;

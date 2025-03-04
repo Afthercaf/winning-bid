@@ -22,7 +22,7 @@ const upload = multer({
 
 // Crear un reporte
 export const createReport = [
-    upload.array('reportImages', 5), // Permitir hasta 5 imágenes
+    upload.array('images', 5), // Permitir hasta 5 imágenes
     async (req, res) => {
         try {
             const { reportedId, productId, description } = req.body;
