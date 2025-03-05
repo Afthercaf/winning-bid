@@ -7,7 +7,6 @@ import { uploadImageToImgur } from '../imgurService.js';
 
 // Configuración de multer para manejar la subida de imágenes
 const multerStorage = multer.memoryStorage();
-const websocketManager = new WebSocketManager();
 const upload = multer({
     storage: multerStorage,
     limits: { fileSize: 5 * 1024 * 1024 },
@@ -26,7 +25,7 @@ export const createReport = [
     upload.array('images', 5), // Permitir hasta 5 imágenes
     async (req, res) => {
         try {
-            const { reportedId, productId, description } = req.body;
+            const { reportedId, productId, description,category } = req.body;
             const reporterId = req.user.id;
 
             // Verificar si el producto y el usuario reportado existen
@@ -56,7 +55,8 @@ export const createReport = [
                 reported: reportedId,
                 product: productId,
                 reportImages: validImages,
-                description
+                description,
+                category,
             });
 
             await newReport.save();
