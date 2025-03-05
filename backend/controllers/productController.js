@@ -1,5 +1,5 @@
 import multer from 'multer';
-import { uploadImageToImgur } from "../imgurService.js"; // Asegúrate de usar la ruta correcta
+import { uploadImageToImgur, uploadImageToCloudinary  } from "../imgurService.js"; // Asegúrate de usar la ruta correcta
 import Product from '../models/Product.js';
 import Bid from "../models/Bid.js"; 
 import WebSocketManager from '../websocket.js';
@@ -7,36 +7,36 @@ import WebSocketManager from '../websocket.js';
 
 
 // Configuración de multer
+// Configuración de multer
 const multerStorage = multer.memoryStorage();
-const websocketManager = new WebSocketManager();
 const upload = multer({
     storage: multerStorage,
-    limits: { fileSize: 5 * 1024 * 1024 },
+    limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
     fileFilter: (req, file, cb) => {
         if (!file.mimetype.startsWith('image/')) {
-            const error = new Error('Solo se permiten archivos de imagen');
-            error.status = 400;
-            return cb(error, false);
+            return cb(new Error('Solo se permiten archivos de imagen'), false);
         }
         cb(null, true);
     },
 });
 
+const websocketManager = new WebSocketManager();
+
 export const createProduct = [
-    upload.array('images', 5),
+    upload.array('images', 5), // Permitir hasta 5 imágenes
     async (req, res) => {
         try {
-            const { name, description, category, auctionType, type, flashDuration, startingPrice, auctionStartTime, auctionEndTime } = req.body;
+            const { name, description, category, auctionType, type, startingPrice, auctionEndTime } = req.body;
 
-            if (!name || !description || !category ) {
+            if (!name || !description || !category) {
                 return res.status(400).json({ error: 'Faltan datos obligatorios' });
             }
 
-            // Subir imágenes a Imgur
+            // Subir imágenes a Cloudinary
             const images = await Promise.all(
                 req.files.map(async (file) => {
                     try {
-                        return await uploadImageToImgur(file); // Usa la función de Imgur
+                        return await uploadImageToCloudinary(file);
                     } catch (error) {
                         console.error(`Error al subir la imagen ${file.originalname}:`, error);
                         return null;
@@ -44,22 +44,22 @@ export const createProduct = [
                 })
             );
 
-            const validImages = images.filter((url) => url !== null); // Filtra imágenes no subidas
+            const validImages = images.filter((url) => url !== null);
 
-            // Crear el producto en la base de datos
+            // Crear producto en la base de datos
             const newProduct = new Product({
                 name,
                 description,
                 category,
-                type: 'subasta',  // Valor predeterminado "subasta"
+                type: 'subasta',
                 auctionType,
-                flashDuration: auctionType === 'flash' ? 60 : undefined, // Solo permite 1 hora para flash
+                flashDuration: auctionType === 'flash' ? 60 : undefined,
                 images: validImages,
                 startingPrice: type === 'subasta' ? startingPrice : undefined,
                 auctionEndTime: type === 'subasta' ? auctionEndTime : undefined,
                 seller_id: req.user.id,
                 currentPrice: type === 'subasta' ? startingPrice : undefined,
-                });
+            });
 
             await newProduct.save();
             res.status(201).json(newProduct);
@@ -69,8 +69,6 @@ export const createProduct = [
         }
     },
 ];
-
-
 
 // Obtener todos los productos
 export const getProducts = async (req, res) => {
@@ -209,7 +207,38 @@ export const getUserProducts = async (req, res) => {
     }
 };
 
+export const getFlashAuctions = async (req, res) => {
+    try {
+        const flashAuctions = await Product.aggregate([
+            { $match: { type: 'subasta', auctionType: 'flash', isActive: true } }, // Solo subastas flash activas
+            { $sample: { size: 3 } } // Aseguramos que siempre devuelva una lista de hasta 3 productos
+        ]);
 
+        await Product.populate(flashAuctions, { path: 'seller_id', select: 'name email' });
+
+        if (!Array.isArray(flashAuctions) || flashAuctions.length === 0) {
+            return res.status(404).json([]); // ⬅️ Retorna un array vacío en lugar de un objeto
+        }
+
+        // Calculamos el tiempo restante para cada producto
+        const currentTime = new Date();
+        const formattedAuctions = flashAuctions.map(auction => ({
+            _id: auction._id,
+            name: auction.name,
+            description: auction.description.length > 200 ? auction.description.substring(0, 200) + '...' : auction.description,
+            image: auction.images.length > 0 ? auction.images[0] : "https://via.placeholder.com/200",
+            seller: auction.seller_id,
+            timeLeft: Math.max(0, Math.floor((new Date(auction.auctionEndTime) - currentTime) / 1000)), // Tiempo restante en segundos
+            currentPrice: auction.currentPrice || auction.startingPrice,
+        }));
+
+        res.status(200).json(formattedAuctions); // ⬅️ Aseguramos que siempre devuelve un array
+
+    } catch (error) {
+        console.error('❌ Error al obtener las subastas flash:', error.message);
+        res.status(500).json({ message: 'Error al obtener las subastas flash', error });
+    }
+};
 // En tu controlador, por ejemplo, en controllers/productController.js
 // Controlador para obtener productos tipo 'flash'
 // Controlador para obtener productos tipo 'flash'

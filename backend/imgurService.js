@@ -11,6 +11,7 @@ export const uploadImageToImgur = async (file) => {
                 headers: {
                     Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`, // Usa tu Client ID
                 },
+
             }
         );
 
@@ -20,4 +21,35 @@ export const uploadImageToImgur = async (file) => {
         console.error('Error al subir imagen a Imgur:', error.response?.data || error.message);
         throw new Error('No se pudo subir la imagen a Imgur.');
     }
+};
+
+import { v2 as cloudinary } from 'cloudinary';
+import { config } from 'dotenv';
+import streamifier from 'streamifier';
+
+config(); // Cargar variables de entorno
+
+// Configurar Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+export const uploadImageToCloudinary = (file) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { folder: 'productos' }, // Carpeta en Cloudinary
+            (error, result) => {
+                if (error) {
+                    console.error('Error subiendo imagen a Cloudinary:', error);
+                    reject(new Error('No se pudo subir la imagen a Cloudinary.'));
+                } else {
+                    resolve(result.secure_url); // URL de la imagen subida
+                }
+            }
+        );
+
+        streamifier.createReadStream(file.buffer).pipe(stream);
+    });
 };
