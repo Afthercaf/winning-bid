@@ -19,7 +19,6 @@ const reportSchema = new mongoose.Schema({
     },
     reportImages: [{
         type: String, // URLs de las imágenes del reporte
-        required: true
     }],
     description: {
         type: String,

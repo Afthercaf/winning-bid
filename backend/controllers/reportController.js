@@ -7,9 +7,10 @@ import { uploadImageToImgur } from '../imgurService.js';
 
 // Configuración de multer para manejar la subida de imágenes
 const multerStorage = multer.memoryStorage();
+const websocketManager = new WebSocketManager();
 const upload = multer({
     storage: multerStorage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         if (!file.mimetype.startsWith('image/')) {
             const error = new Error('Solo se permiten archivos de imagen');
@@ -37,10 +38,10 @@ export const createReport = [
             }
 
             // Subir imágenes del reporte a Imgur
-            const reportImages = await Promise.all(
+            const images = await Promise.all(
                 req.files.map(async (file) => {
                     try {
-                        return await uploadImageToImgur(file);
+                        return await uploadImageToImgur(file); // Usa la función de Imgur
                     } catch (error) {
                         console.error(`Error al subir la imagen ${file.originalname}:`, error);
                         return null;
@@ -48,14 +49,13 @@ export const createReport = [
                 })
             );
 
-            const validReportImages = reportImages.filter(url => url !== null);
-
+            const validImages = images.filter((url) => url !== null); // Filtra imágenes no subidas
             // Crear el reporte en la base de datos
             const newReport = new Report({
                 reporter: reporterId,
                 reported: reportedId,
                 product: productId,
-                reportImages: validReportImages,
+                reportImages: validImages,
                 description
             });
 
