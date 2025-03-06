@@ -56,6 +56,8 @@ const userSchema = new mongoose.Schema({
         type: [Number],
         default: [10, 15, 20],
     },
+    isActive: { type: Boolean, default: true },
+    opportunities: { type: Number, default: 3 }
 });
 
 // Crear el modelo de usuario usando el esquema definido

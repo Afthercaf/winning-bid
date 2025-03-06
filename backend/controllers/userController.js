@@ -153,3 +153,78 @@ exports.getLatestUsers = async (req, res) => {
 };
 
   
+exports.deactivateUser = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        if (user.opportunities > 1) {
+            user.opportunities -= 1;
+            await user.save();
+            return res.status(200).json({ message: `Oportunidad reducida. Oportunidades restantes: ${user.opportunities}`, user });
+        } else {
+            user.isActive = false;
+            user.opportunities = 0;
+            await user.save();
+            return res.status(200).json({ message: 'Cuenta desactivada', user });
+        }
+    } catch (error) {
+        console.error('Error al desactivar la cuenta:', error.message);
+        res.status(500).json({ message: 'Error al desactivar la cuenta', error });
+    }
+};
+
+exports.activateAllUsers = async (req, res) => {
+    try {
+        // Buscar y actualizar todas las cuentas desactivadas
+        const result = await User.updateMany(
+            {}, // Actualizar todos los documentos
+            { 
+                $set: { 
+                    isActive: true, // Establecer isActive como true
+                    opportunities: 3 // Establecer oportunidades como 3
+                } 
+            },
+            { upsert: false } // No crear nuevos documentos si no existen
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: 'No se encontraron cuentas para actualizar' });
+        }
+
+        res.status(200).json({ message: `Se actualizaron ${result.modifiedCount} cuentas` });
+    } catch (error) {
+        console.error('Error activando todas las cuentas:', error.message);
+        res.status(500).json({ message: 'Error activando todas las cuentas', error });
+    }
+};
+
+exports.activateUserById = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        if (user.isActive) {
+            return res.status(200).json({ message: 'La cuenta ya está activa', user });
+        }
+
+        user.isActive = true;
+        user.opportunities = 3; // Restablecer las oportunidades a 3 (o el valor que desees)
+        await user.save();
+
+        res.status(200).json({ message: 'Cuenta activada exitosamente', user });
+    } catch (error) {
+        console.error('Error activando la cuenta:', error.message);
+        res.status(500).json({ message: 'Error activando la cuenta', error });
+    }
+};

@@ -3,8 +3,7 @@ import { uploadImageToImgur, uploadImageToCloudinary  } from "../imgurService.js
 import Product from '../models/Product.js';
 import Bid from "../models/Bid.js"; 
 import WebSocketManager from '../websocket.js';
-
-
+import User from "../models/User.js"
 
 // Configuración de multer
 // Configuración de multer
@@ -27,6 +26,15 @@ export const createProduct = [
     async (req, res) => {
         try {
             const { name, description, category, auctionType, type, startingPrice, auctionEndTime } = req.body;
+
+            const userId = req.user.id; // ID del usuario autenticado
+
+            // Verificar si el usuario está activo
+            const user = await User.findById(userId);
+            if (!user.isActive) {
+                return res.status(403).json({ message: "Tu cuenta está desactivada. No puedes crear productos." });
+            }
+
 
             if (!name || !description || !category) {
                 return res.status(400).json({ error: 'Faltan datos obligatorios' });

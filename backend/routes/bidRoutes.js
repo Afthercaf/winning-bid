@@ -65,8 +65,13 @@ router.post("/:productId/bid-j", async (req, res) => {
           throw new Error("Parámetros de entrada inválidos");
         }
 
+        
         // Buscar el usuario y el producto
-        const user = await User.findById(userId).session(session);
+        // Verificar si el usuario está activo
+        const user = await User.findById(userId);
+        if (!user.isActive) {
+            return res.status(403).json({ message: "Tu cuenta está desactivada. No puedes pujar." });
+        }
         const product = await Product.findById(productId).session(session);
 
         if (!user) throw new Error("Usuario no encontrado");

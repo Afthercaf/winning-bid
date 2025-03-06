@@ -17,7 +17,9 @@ router.put('/:id/avatar', userController.updateAvatar); // Nueva ruta para actua
 router.delete('/:id', userController.deleteUser);
 // Ruta para obtener el avatar del usuario actual
 router.get('/:id/avatar', userController.getAvatar);
-
+router.post('/deactivate/:userId', userController.deactivateUser);
+router.post('/users/activate-all', userController.activateAllUsers); // Activar todas las cuentas desactivadas
+router.post('/users/:userId/activate', userController.activateUserById); // Activar una cuenta específica por ID
 router.post('/save-player-id', async (req, res) => {
     const { userId, playerId } = req.body;
   

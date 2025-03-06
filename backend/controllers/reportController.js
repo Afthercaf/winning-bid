@@ -122,3 +122,27 @@ export const deleteReport = async (req, res) => {
         res.status(500).json({ message: 'Error al eliminar el reporte', error });
     }
 };
+
+// Obtener reportes por ID de usuario (reportado o reportero)
+export const getReportsByUserId = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // Buscar reportes donde el usuario sea el reportero o el reportado
+        const reports = await Report.find({
+            $or: [{ reporter: userId }, { reported: userId }],
+        })
+            .populate('reporter', 'name email')
+            .populate('reported', 'name email')
+            .populate('product', 'name images');
+
+        if (!reports || reports.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron reportes para este usuario' });
+        }
+
+        res.status(200).json(reports);
+    } catch (error) {
+        console.error('Error al obtener los reportes por ID de usuario:', error.message);
+        res.status(500).json({ error: 'Error al obtener los reportes' });
+    }
+};
