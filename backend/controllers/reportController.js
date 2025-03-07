@@ -168,3 +168,24 @@ export const getReportById = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener el reporte' });
     }
 };
+
+export const getReportsForReportedUser = async (req, res) => {
+    try {
+        const { userId } = req.params; // ID del usuario que ha sido reportado
+
+        const reports = await Report.find({ reported: userId })
+            .populate('reporter') // Trae todos los datos del usuario que reportó
+            .populate('reported') // Trae todos los datos del usuario reportado
+            .populate('product') // Trae todos los datos del producto relacionado
+            .lean();
+
+        if (!reports.length) {
+            return res.status(404).json({ message: 'No hay reportes para este usuario' });
+        }
+
+        res.status(200).json(reports);
+    } catch (error) {
+        console.error("Error al obtener reportes para el usuario reportado:", error.message);
+        res.status(500).json({ error: 'Error al obtener reportes' });
+    }
+};
