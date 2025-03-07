@@ -20,6 +20,7 @@ router.get('/daily-deals', productController.getDailyDeals);
 
 router.get('/daily-auctions', productController.getDailyAuctions);
 
+router.get('/seller/:sellerId/products', productController.getProductsBySeller);
 
 // Ruta en el backend
 router.get('/recommendations', productController.getRecommendedProducts);
