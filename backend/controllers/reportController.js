@@ -134,6 +134,7 @@ export const getReportsByUserId = async (req, res) => {
         })
             .populate('reporter', 'name email')
             .populate('reported', 'name email')
+            .populate
             .populate('product', 'name images');
 
         if (!reports || reports.length === 0) {
@@ -144,5 +145,26 @@ export const getReportsByUserId = async (req, res) => {
     } catch (error) {
         console.error('Error al obtener los reportes por ID de usuario:', error.message);
         res.status(500).json({ error: 'Error al obtener los reportes' });
+    }
+};
+
+export const getReportById = async (req, res) => {
+    try {
+        const { reportId } = req.params;
+
+        const report = await Report.findById(reportId)
+            .populate('reporter', 'name email') // Datos del usuario que hizo el reporte
+            .populate('reported', 'name email') // Datos del usuario que fue reportado
+            .populate('product', 'name price description') // Datos del producto reportado
+            .lean();
+
+        if (!report) {
+            return res.status(404).json({ error: 'Reporte no encontrado' });
+        }
+
+        res.status(200).json(report);
+    } catch (error) {
+        console.error("Error al obtener el reporte:", error.message);
+        res.status(500).json({ error: 'Error al obtener el reporte' });
     }
 };
