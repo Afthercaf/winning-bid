@@ -29,6 +29,7 @@ const productSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true },
     seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now },
+    sellerAddress: { type: String },
 });
 
 const Product = mongoose.model('Product', productSchema);
