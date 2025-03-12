@@ -25,7 +25,7 @@ export const createProduct = [
     upload.array('images', 5), // Permitir hasta 5 imágenes
     async (req, res) => {
         try {
-            const { name, description, category, auctionType, type, startingPrice, auctionEndTime } = req.body;
+            const { name, description, category, auctionType, type, startingPrice, auctionEndTime, sellerAddress } = req.body;
 
             const userId = req.user.id; // ID del usuario autenticado
 
@@ -35,8 +35,7 @@ export const createProduct = [
                 return res.status(403).json({ message: "Tu cuenta está desactivada. No puedes crear productos." });
             }
 
-
-            if (!name || !description || !category) {
+            if (!name || !description || !category || !sellerAddress) {
                 return res.status(400).json({ error: 'Faltan datos obligatorios' });
             }
 
@@ -66,6 +65,7 @@ export const createProduct = [
                 startingPrice: type === 'subasta' ? startingPrice : undefined,
                 auctionEndTime: type === 'subasta' ? auctionEndTime : undefined,
                 seller_id: req.user.id,
+                sellerAddress, // Añadir la dirección del vendedor
                 currentPrice: type === 'subasta' ? startingPrice : undefined,
             });
 

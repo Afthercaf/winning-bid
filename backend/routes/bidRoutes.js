@@ -72,6 +72,7 @@ router.post("/:productId/bid-j", async (req, res) => {
         if (!user.isActive) {
             return res.status(403).json({ message: "Tu cuenta está desactivada. No puedes pujar." });
         }
+        
         const product = await Product.findById(productId).session(session);
 
         if (!user) throw new Error("Usuario no encontrado");
