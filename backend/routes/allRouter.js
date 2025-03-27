@@ -10,9 +10,9 @@ const reviewRoutes = require("./reviewRoutes");
 const paymentRoutes = require("./paymentRoutes");
 const wishlistRoutes = require("./wishlistRoutes");
 const notificationRoutes = require("./notificationRoutes");
-const bidRoutes = require("./bidRoutes");
 const auctionRoutes = require("./auctionRoutes");
 const reportRoutes = require("./reportRoutes");
+const inverseAuctionRoutes = require("./inverseAutionRoutes");
 
 const router = express.Router();
 
@@ -30,5 +30,7 @@ router.use("/payments", paymentRoutes);
 router.use("/wishlists", wishlistRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/reports", reportRoutes);
+router.use("/inverse-auctions", inverseAuctionRoutes);
+
 
 module.exports = router;

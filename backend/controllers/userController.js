@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Role = require("../models/Role");
+const Product = require("../models/Product");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
@@ -244,12 +245,11 @@ exports.deactivateUser = async (req, res) => {
 exports.activateAllUsers = async (req, res) => {
   try {
     // Buscar y actualizar todas las cuentas desactivadas
-    const result = await User.updateMany(
+    const result = await Product.updateMany(
       {}, // Actualizar todos los documentos
       {
         $set: {
-          isActive: true, // Establecer isActive como true
-          opportunities: 3, // Establecer oportunidades como 3
+          sellerAddress: "Calle 123, Ciudad de México", // Actualizar el campo
         },
       },
       { upsert: false } // No crear nuevos documentos si no existen
